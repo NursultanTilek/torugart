@@ -5,8 +5,9 @@ import { SimulationService } from './simulation.service';
 
 // Zone 8: 6 horizontal lanes, trucks sit at registration booths on the LEFT side
 const LANE_ZS = [-8, -10, -12, -14, -16, -18]; // z positions for each lane (1=bottom, 6=top in 3D: more negative = further north)
-const SLOT_XS = [-18]; // x position where truck sits during registration (at booth)
-const MAX_LANE = 1;
+// 4 slot positions per lane: 1 at booth (processing) + 3 waiting in line
+const SLOT_XS = [-18, -14, -10, -6];
+const MAX_LANE = 4;
 // Main road: east→west along z=0, then branch north at x=5
 const MAIN_ROAD: [number, number][] = [[35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0]];
 const BRANCH_ROAD: [number, number][] = [[5, 0], [5, -3], [5, -6], [5, -9], [5, -12], [5, -18], [5, -22]];
@@ -72,7 +73,7 @@ export class SceneService {
     this.buildGate(); this.buildTrafficLight(); this.buildMonitoringPanel();
     this.truckGroup = new THREE.Group();
     this.scene.add(this.truckGroup);
-    this.loadTruckTemplate().then(() => { for (let i = 0; i < 8; i++) this.spawnTruck(); });
+    this.loadTruckTemplate().then(() => { this.spawnTruck(); });
     this.createTooltip(el); this.bindEvents(el); this.loop();
   }
 
@@ -254,25 +255,21 @@ export class SceneService {
       rm.position.set(x, sy + sy * 0.055 - 0.02, z); rm.castShadow = true; this.scene.add(rm);
       this.registerLabel(rm, tip); this.addSprite(lbl, x, z, sy + 1.0, 2.4, 0.65);
     };
-    // Погран. контроль — on main road, right side
-    b(20, -3, 3.0, 2.5, 2.0, 0xd8dcc8, 'Погран.контроль', 'Пограничный контроль\nФиксация АТС\nВремя: 2-3 мин');
-    // Весы №1 — on the road, tunnel style (trucks drive through)
-    const wTip = 'Весы №1\nВесогабаритный контроль\nВремя: 5 мин';
-    // Left wall
-    const wl = this.M(new THREE.BoxGeometry(1.2, 3.0, 4.0), new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.78 }), 3.2, 1.5, -10, true);
-    this.registerLabel(wl, wTip);
-    // Right wall
-    const wr = this.M(new THREE.BoxGeometry(1.2, 3.0, 4.0), new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.78 }), 6.8, 1.5, -10, true);
-    this.registerLabel(wr, wTip);
-    // Roof spanning both walls (tunnel)
-    this.M(new THREE.BoxGeometry(5.0, 0.3, 4.0), new THREE.MeshStandardMaterial({ color: 0xd0ccc0, roughness: 0.8 }), 5, 3.15, -10, true);
-    this.addSprite('Весы №1', 5, -10, 4.0, 2.4, 0.65);
+    // Погран. контроль — normal building on the side of road
+    b(20, -4, 3.0, 2.5, 2.0, 0xd8dcc8, 'Погран.контроль', 'Пограничный контроль\nФиксация АТС\nВремя: 1 мин');
+    // Весы №1 — wide tunnel for 2 trucks side by side
+    const wTip = 'Весы №1\nВесогабаритный контроль\nВремя: 3-5 мин';
+    const wm = new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.78 });
+    const wl = this.M(new THREE.BoxGeometry(1.2, 3.0, 5.0), wm, 2.5, 1.5, -10, true); this.registerLabel(wl, wTip);
+    this.M(new THREE.BoxGeometry(1.2, 3.0, 5.0), wm, 7.5, 1.5, -10, true);
+    this.M(new THREE.BoxGeometry(6.5, 0.3, 5.0), new THREE.MeshStandardMaterial({ color: 0xd0ccc0, roughness: 0.8 }), 5, 3.15, -10, true);
+    this.addSprite('Весы', 5, -10, 4.0, 2.4, 0.65);
     // ГКО — exit of Zone 8, north side of exit road
     b(-20, -17, 2.5, 2.8, 2.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
     // Процесс ГТИ — behind ГКО
     b(-26, -17, 3.0, 2.5, 2.0, 0xdcd0c0, 'Процесс ГТИ', 'Процесс ГТИ\nВремя: 2 мин');
     // Накопитель — queue area label on the branch road
-    this.addSprite('Накопитель', 5, -14, 1.5, 2.8, 0.65);
+    // this.addSprite('Накопитель', 5, -14, 1.5, 2.8, 0.65);
     // Зона регистрации label
     this.addSprite('Зона регистрации', -10, -7, 1.5, 3.5, 0.65);
   }
@@ -301,7 +298,7 @@ export class SceneService {
     this.M(new THREE.BoxGeometry(2.0, 0.15, 1.6), new THREE.MeshStandardMaterial({ color: 0x282e38 }), x, 0.08, z);
     const wall = this.M(new THREE.BoxGeometry(1.8, 3.6, 1.4), new THREE.MeshStandardMaterial({ color: 0x4a6278, roughness: 0.75 }), x, 1.85, z, true);
     this.M(new THREE.BoxGeometry(0.06, 0.8, 0.9), new THREE.MeshStandardMaterial({ color: 0x88c0ee, transparent: true, opacity: 0.65, metalness: 0.35 }), x + 0.93, 2.2, z);
-    this.addSprite(label, x, z, 4.2, 1.1, 0.45);
+    //this.addSprite(label, x, z, 4.2, 1.1, 0.45);
     this.registerLabel(wall, `${label}\nКабина регистрации\nВремя: 20-25 мин`);
   }
 
@@ -326,7 +323,7 @@ export class SceneService {
     this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -22, 1.0, -6, true);
     this.M(new THREE.CylinderGeometry(0.06, 0.06, 20, 8), bm, -12, 1.95, -6, true, 0, 0, Math.PI / 2);
     for (let si = 0; si < 10; si++) this.M(new THREE.BoxGeometry(0.7, 0.14, 0.14), wm, -21 + si * 2, 1.95, -5.98);
-    this.addSprite('Ворота (вход)', -12, -6, 2.8, 3.0, 0.55);
+    //this.addSprite('Ворота (вход)', -12, -6, 2.8, 3.0, 0.55);
     // Exit gate — after ГТИ, before main road
     this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -23, 1.0, -2, true);
     this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -27, 1.0, -2, true);
@@ -336,7 +333,7 @@ export class SceneService {
   }
 
   private buildTrafficLight() {
-    const g = new THREE.Group(); g.position.set(25, 0, -3);
+    const g = new THREE.Group(); g.position.set(22, 0, -3);
     const a = (geo: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
       const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; g.add(m);
     };
@@ -347,7 +344,7 @@ export class SceneService {
     this.tlGreen = new THREE.MeshStandardMaterial({ color: 0x11dd22, emissive: 0x08aa10, emissiveIntensity: 1.5, roughness: 0.2 });
     a(new THREE.SphereGeometry(0.078, 12, 8), this.tlGreen, 0, 2.06, 0.11);
     this.scene.add(g); this.registerLabel(g, 'Светофор\nКонтроль входа ТС');
-    this.addSprite('Светофор', 25, -3, 3.0, 2.0, 0.55);
+    // this.addSprite('Светофор', 25, -3, 3.0, 2.0, 0.55);
   }
 
   private updateTrafficLight() {
@@ -413,10 +410,14 @@ export class SceneService {
   }
 
   private addSprite(text: string, x: number, z: number, y: number, w: number, h: number) {
-    const c = document.createElement('canvas'); c.width = 256; c.height = 80;
-    const ctx = c.getContext('2d')!; ctx.clearRect(0, 0, 256, 80);
-    ctx.fillStyle = '#ff2222'; ctx.font = 'bold 36px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    text.split('\n').forEach((l, i) => ctx.fillText(l, 128, 26 + i * 25));
+    const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+    const ctx = c.getContext('2d')!;
+    // Dark background for readability
+    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.beginPath();
+    ctx.roundRect(8, 8, 496, 112, 16); ctx.fill();
+    // White text on dark background
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 36px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    text.split('\n').forEach((l, i) => ctx.fillText(l, 256, 50 + i * 40));
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
     s.position.set(x, y, z); s.scale.set(w, h, 1); this.scene.add(s);
   }
@@ -430,7 +431,7 @@ export class SceneService {
     s.position.set(x, y, z); s.scale.set(cw / 90, ch / 90, 1); g.add(s);
   }
 
-  private loadGLB(path: string, scale: number, rotY = -Math.PI / 2): Promise<THREE.Group | null> {
+  private loadGLB(path: string, scale: number, rotY = 0): Promise<THREE.Group | null> {
     return new Promise(resolve => {
       new GLTFLoader().load(path, gltf => {
         const wrapper = new THREE.Group(); const inner = gltf.scene;
@@ -460,7 +461,10 @@ export class SceneService {
   private tickSpawn(dt: number) {
     this.spawnTimer += dt;
     if (this.spawnTimer >= this.nextSpawn) {
-      this.spawnTimer = 0; if (this.sim.isGreen()) this.spawnTruck();
+      this.spawnTimer = 0;
+      // When green: spawn freely. When red: allow up to 5 trucks to queue at light
+      const waitingAtLight = this.trucks.filter(t => t.root.position.x > 24 && !t.inSlot).length;
+      if (this.sim.isGreen() || waitingAtLight < 5) this.spawnTruck();
       this.nextSpawn = this.sim.getSpawnIntervalSeconds();
     }
   }
@@ -499,19 +503,20 @@ export class SceneService {
       lanes: slotsPerLane.map(() => ({ trucks: [], elapsed: [], remaining: [] })),
       sequential: seq, maxPerLane: mpl, nextLane: 0,
     });
-    // Zone 1: Погран.контроль on main road (2-3 min)
-    this.zones.push(make(1, 2, 3, 20, 0, [[[20, 0]]]));
-    // Zone 2: Весы — 2 parallel lanes so trucks don't jam (5 min)
-    this.zones.push(make(2, 3, 5, 5, -10, [[[5, -9]], [[5, -11]]], [[10, 0], [5, 0], [5, -5]]));
-    // Zone 3: Накопитель / queue (5 min)
-    this.zones.push(make(3, 3, 5, 3, -14, [[[3, -14]]], [[5, -12], [5, -14]]));
-    // Zone 8: Registration — 6 horizontal lanes, 1 truck per lane, 20-25 min
-    const z8 = make(8, 20, 25, -2, -13,
+    // Zone 1: Погран.контроль — tunnel, 2 lanes spread apart (0.5-1 min)
+    this.zones.push(make(1, 0.5, 1, 20, 0, [[[20, -1.2]], [[20, 1.2]]]));
+    // Zone 2: Весы — 2 lanes, entry before slots so trucks don't reverse
+    this.zones.push(make(2, 3, 5, 5, -8, [[[5, -10]], [[5, -11]]],
+      [[10, 0], [7, 0], [6, -1], [5, -2.5], [5, -5]], false, 1));
+    // Zone 3: Накопитель (5 min) — smooth transition down branch
+    this.zones.push(make(3, 3, 5, 3, -14, [[[3, -14]]], [[5, -12], [4.5, -13], [4, -14]]));
+    // Zone 8: Registration — entry at top-right corner so trucks go DOWN then LEFT
+    const z8 = make(8, 20, 25, -2, -6,
       z8Slots.map(lane => lane.map(v => [v.x, v.z] as [number, number])),
-      [[3, -14], [0, -14], [-2, -13]], true, MAX_LANE);
+      [[3, -14], [1, -14], [0, -10], [-1, -7], [-2, -6]], false, MAX_LANE);
     this.zones.push(z8); this.zone8 = z8;
-    // Zone 5: ГКО → ГТИ (behind ГКО), 2-3 min processing
-    this.zones.push(make(5, 2, 3, -25, -13, [[[-25, -13]]], [[-20, -13]]));
+    // Zone 5: ГКО → ГТИ, smooth exit path (2-3 min)
+    this.zones.push(make(5, 2, 3, -25, -13, [[[-25, -13]]], [[-19, -13], [-22, -13]]));
   }
 
   private tickZones(dt: number) {
@@ -522,6 +527,15 @@ export class SceneService {
         lane.elapsed[0] += sd; lane.remaining[0] -= sd;
         if (lane.remaining[0] <= 0) {
           const done = lane.trucks.shift()!; lane.elapsed.shift(); lane.remaining.shift();
+          // Shift remaining trucks forward to their new slot positions
+          if (zone === this.zone8) {
+            const li = done.laneAssigned;
+            const slots = zone.slotsByLane[Math.min(li, zone.slotsByLane.length - 1)];
+            for (let i = 0; i < lane.trucks.length; i++) {
+              const s = slots[Math.min(i, slots.length - 1)];
+              this.moveTo(lane.trucks[i], new THREE.Vector3(s.x, 0.15, LANE_ZS[li]));
+            }
+          }
           if (lane.trucks.length) lane.remaining[0] = this.rand(zone.minT, zone.maxT);
           this.advance(done);
         }
@@ -529,7 +543,11 @@ export class SceneService {
     }
     this.sim.updateLanes(
       this.zone8.lanes.map(l => l.trucks.length),
-      this.zone8.lanes.map(l => ({ processing: l.trucks.length > 0, remaining: l.remaining[0] ?? 0, queueCount: 0 })),
+      this.zone8.lanes.map(l => ({
+        processing: l.trucks.length > 0,
+        remaining: l.remaining[0] ?? 0,
+        queueCount: Math.max(0, l.trucks.length - 1),
+      })),
       this.z8Queue.length
     );
   }
@@ -557,30 +575,42 @@ export class SceneService {
       }
     }
     if (li < 0) {
-      t.waitTimer = 0.4;
+      t.waitTimer = 1.0;
       if (zone.id === 8) {
         if (!this.z8Queue.includes(t)) this.z8Queue.push(t);
         const qi = this.z8Queue.indexOf(t);
-        this.moveTo(t, new THREE.Vector3(-2 + qi * 2.2, 0.15, -13));
+        // Queue near zone 8 entry, spaced 2.5 units going right (east)
+        this.moveTo(t, new THREE.Vector3(-2 + (qi + 1) * 2.5, 0.15, -6));
       }
       return;
     }
     if (zone.id === 8) this.z8Queue = this.z8Queue.filter(q => q !== t);
     const lane = zone.lanes[li];
+    const si = lane.trucks.length; // position in lane (0=at booth, 1-3=waiting)
     const slots = zone.slotsByLane[Math.min(li, zone.slotsByLane.length - 1)];
-    const pos = slots[0];
+    const pos = slots[Math.min(si, slots.length - 1)];
     lane.trucks.push(t); lane.elapsed.push(0);
-    lane.remaining.push(lane.trucks.length === 1 ? this.rand(zone.minT, zone.maxT) : 0);
+    lane.remaining.push(si === 0 ? this.rand(zone.minT, zone.maxT) : 0);
     t.inSlot = true; t.laneAssigned = li;
     if (zone.id === 8) this.sim.logDistribution(t.id, li);
-    this.moveTo(t, pos);
+    if (zone.id === 8) {
+      const laneZ = LANE_ZS[li];
+      // Truck is at (-2, -6). Go DOWN to lane's z, then LEFT to slot
+      this.followPath(t, [
+        new THREE.Vector3(-2, 0.15, laneZ),
+        new THREE.Vector3(pos.x, 0.15, laneZ),
+      ], () => {});
+    } else {
+      this.moveTo(t, pos);
+    }
   }
 
   private exitTruck(t: TruckObj) {
     this.sim.truckExited();
     this.followPath(t, [
-      new THREE.Vector3(-25, 0.15, -8), new THREE.Vector3(-25, 0.15, -3),
-      new THREE.Vector3(-25, 0.15, 0), new THREE.Vector3(-32, 0.15, 0),
+      new THREE.Vector3(-25, 0.15, -10), new THREE.Vector3(-25, 0.15, -6),
+      new THREE.Vector3(-25, 0.15, -2), new THREE.Vector3(-25.5, 0.15, -0.5),
+      new THREE.Vector3(-27, 0.15, 0), new THREE.Vector3(-32, 0.15, 0),
     ], () => { this.truckGroup.remove(t.root); this.trucks = this.trucks.filter(x => x !== t); });
   }
 
@@ -592,43 +622,42 @@ export class SceneService {
     const sd = this.sim.simSpeed(), sDt = dt * sd, redLight = !this.sim.isGreen();
     for (const t of this.trucks) {
       if (t.waitTimer > 0) { t.waitTimer -= sDt; if (t.waitTimer <= 0) this.tryEnter(t, t.zonePath[t.zoneIdx]); continue; }
-      if (redLight && t.root.position.x > 27 && !t.inSlot) {
-        t.speed = Math.max(0, t.speed - 12 * sDt);
-        if (t.speed > 0.01) t.root.position.addScaledVector(t.heading, t.speed * dt); continue;
+      // Stop at red light
+      if (redLight && t.root.position.x > 24 && !t.inSlot) {
+        t.speed = Math.max(0, t.speed - 10 * dt); continue;
       }
-      if (!t.target) { t.speed = Math.max(0, t.speed - 8 * sDt); if (t.speed > 0.01) t.root.position.addScaledVector(t.heading, t.speed * dt); continue; }
-      const dx = t.target.x - t.root.position.x, dz = t.target.z - t.root.position.z, dist = Math.hypot(dx, dz);
-      if (dist < 0.2) { t.root.position.x = t.target.x; t.root.position.z = t.target.z; t.speed = 0; t.target = null;
-        if (t.wpQueue.length) this.stepPath(t); else { const cb = t.wpDone; t.wpDone = null; cb?.(); } continue; }
-      const pd = new THREE.Vector3(dx / dist, 0, dz / dist);
-      let top = 8 * sd * (0.9 + (t.id % 6) * 0.02);
-      if (!t.inSlot) top = this.carFollow(t, top, pd);
-      const dot = t.heading.dot(pd);
-      const tp = dot < 0.85 ? THREE.MathUtils.clamp((dot - 0.3) / 0.55, 0.3, 1) : 1;
-      const desired = Math.min(top, top * dist / 3.0) * tp;
-      t.speed += (desired - t.speed) * Math.min(4.0 * sDt, 0.92); t.speed = Math.max(0, t.speed);
-      if (t.speed < 0.01) continue;
-      const tr = THREE.MathUtils.clamp(2.5 / (1 + t.speed * 0.04), 0.6, 3.5);
-      t.heading.lerp(pd, Math.min(tr * sDt, 1)).normalize();
-      t.root.position.addScaledVector(t.heading, t.speed * dt);
-      const ta = Math.atan2(-t.heading.z, t.heading.x) + Math.PI;
-      let rd = ta - t.root.rotation.y;
-      while (rd > Math.PI) rd -= 2 * Math.PI; while (rd < -Math.PI) rd += 2 * Math.PI;
-      t.root.rotation.y += rd * Math.min(5.0 * dt, 1); t.yaw = t.root.rotation.y;
+      // No target — brake
+      if (!t.target) { t.speed = Math.max(0, t.speed - 10 * dt); continue; }
+      const dx = t.target.x - t.root.position.x, dz = t.target.z - t.root.position.z;
+      const dist = Math.hypot(dx, dz);
+      // Reached target
+      if (dist < 0.3) {
+        t.root.position.x = t.target.x; t.root.position.z = t.target.z;
+        t.speed = 0; t.target = null;
+        if (t.wpQueue.length) this.stepPath(t);
+        else { const cb = t.wpDone; t.wpDone = null; cb?.(); }
+        continue;
+      }
+      // Direction to target
+      const dirX = dx / dist, dirZ = dz / dist;
+      // Speed: accelerate, slow near target
+      const maxSpd = 8 * sd;
+      const desired = Math.min(maxSpd, maxSpd * Math.min(dist / 2.0, 1));
+      t.speed += (desired - t.speed) * Math.min(5 * dt, 0.3);
+      t.speed = THREE.MathUtils.clamp(t.speed, 0, maxSpd);
+      // Move
+      const step = t.speed * dt;
+      t.root.position.x += dirX * step;
+      t.root.position.z += dirZ * step;
+      // Face direction — smooth rotation
+      const targetAngle = Math.atan2(dirX, dirZ);
+      let diff = targetAngle - t.root.rotation.y;
+      while (diff > Math.PI) diff -= 2 * Math.PI;
+      while (diff < -Math.PI) diff += 2 * Math.PI;
+      t.root.rotation.y += diff * Math.min(4 * dt, 0.2);
     }
   }
 
-  private carFollow(t: TruckObj, top: number, pd: THREE.Vector3): number {
-    for (const o of this.trucks) {
-      if (o === t) continue;
-      const dx = o.root.position.x - t.root.position.x, dz = o.root.position.z - t.root.position.z;
-      const ahead = dx * pd.x + dz * pd.z;
-      if (ahead <= 0 || ahead > 6) continue;
-      if (Math.hypot(dx - pd.x * ahead, dz - pd.z * ahead) > 1.2) continue;
-      top = Math.min(top, Math.max(top * 0.12, top * (ahead - 2.0) / 4.0));
-    }
-    return top;
-  }
 
   private rand(min: number, max: number) { return min + Math.random() * (max - min); }
 }
