@@ -256,8 +256,17 @@ export class SceneService {
     };
     // Погран. контроль — on main road, right side
     b(20, -3, 3.0, 2.5, 2.0, 0xd8dcc8, 'Погран.контроль', 'Пограничный контроль\nФиксация АТС\nВремя: 2-3 мин');
-    // Весы №1 — further down branch road, east side
-    b(8, -10, 3.8, 2.2, 2.0, 0xe8e0ce, 'Весы №1', 'Весы №1\nВесогабаритный контроль\nВремя: 5 мин');
+    // Весы №1 — on the road, tunnel style (trucks drive through)
+    const wTip = 'Весы №1\nВесогабаритный контроль\nВремя: 5 мин';
+    // Left wall
+    const wl = this.M(new THREE.BoxGeometry(1.2, 3.0, 4.0), new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.78 }), 3.2, 1.5, -10, true);
+    this.registerLabel(wl, wTip);
+    // Right wall
+    const wr = this.M(new THREE.BoxGeometry(1.2, 3.0, 4.0), new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.78 }), 6.8, 1.5, -10, true);
+    this.registerLabel(wr, wTip);
+    // Roof spanning both walls (tunnel)
+    this.M(new THREE.BoxGeometry(5.0, 0.3, 4.0), new THREE.MeshStandardMaterial({ color: 0xd0ccc0, roughness: 0.8 }), 5, 3.15, -10, true);
+    this.addSprite('Весы №1', 5, -10, 4.0, 2.4, 0.65);
     // ГКО — exit of Zone 8, north side of exit road
     b(-20, -17, 2.5, 2.8, 2.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
     // Убытие — departure area after ГКО
