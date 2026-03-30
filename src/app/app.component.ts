@@ -30,8 +30,10 @@ export class AppComponent implements OnInit, OnDestroy {
   setTime(hour: number) { this.sim.setTime(hour); }
   toggleLight() { this.sim.toggleLight(); }
 
+  setIntensity(v: number) { this.sim.setIntensity(v); }
   get speeds() { return [1, 2, 5, 10]; }
-  get hours() { return [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]; }
+  get hours() { return [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]; }
+  get intensities() { return [1, 2, 3, 5, 10, 20, 50]; }
 
   lightModeLabel(): string {
     const m = this.sim.manualLight();

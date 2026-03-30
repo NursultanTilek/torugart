@@ -50,18 +50,33 @@ export class SimulationService {
 
   readonly simHour = computed(() => Math.floor(this.simMinutes() / 60) % 24);
 
-  // Real trucks/day distribution by hour (from spreadsheet)
+  // Real monthly data — trucks per hour (Кол-во АТС за месяц)
   private readonly HOURLY: Record<number, number> = {
-    8: 4.75, 9: 10.2, 10: 15.6, 11: 18.0,
-    12: 16.5, 13: 18.2, 14: 21.4, 15: 20.3,
-    16: 22.2, 17: 23.0, 18: 21.7, 19: 14.6,
-    20: 22.7, 21: 20.9, 22: 16.7, 23: 9.3
+    0: 8, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
+    8: 114, 9: 244, 10: 375, 11: 431,
+    12: 395, 13: 437, 14: 514, 15: 488,
+    16: 532, 17: 551, 18: 521, 19: 351,
+    20: 544, 21: 501, 22: 400, 23: 223,
   };
 
+  // Intensity multiplier (0.1 = very few, 1 = normal, 3 = triple)
+  readonly intensity = signal(1);
+  setIntensity(v: number) { this.intensity.set(v); }
+
   getSpawnIntervalSeconds(): number {
-    const rate = this.HOURLY[this.simHour()] ?? 0;
+    const monthly = this.HOURLY[this.simHour()] ?? 0;
+    if (monthly <= 0) return 9999;
+    // Convert monthly to per-minute: monthly / 30 days = daily, / 60 = per minute
+    const perMinute = (monthly / 30) / 60;
+    const rate = perMinute * this.intensity();
     if (rate <= 0) return 9999;
-    return (60 / rate) / this.simSpeed();
+    return (1 / rate) / this.simSpeed();
+  }
+
+  // Per-lane time adjustment in minutes (added to base 20-25 min)
+  readonly laneDelays = signal<number[]>([0, 0, 0, 0, 0, 0]);
+  adjustLaneDelay(lane: number, delta: number) {
+    this.laneDelays.update(d => { const n = [...d]; n[lane] = Math.max(-15, Math.min(60, n[lane] + delta)); return n; });
   }
 
   setSpeed(s: number) { this.simSpeed.set(s); }

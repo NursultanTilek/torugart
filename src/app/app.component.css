@@ -47,6 +47,12 @@
 .lane-bar { flex: 1; display: flex; }
 .lane-slot { flex: 1; height: 18px; border-radius: 3px; transition: background 0.3s; }
 .lane-time { font-size: 11px; color: #88ccaa; width: 26px; text-align: right; }
+.lane-adj {
+  width: 22px; height: 18px; padding: 0; border-radius: 3px; font-size: 10px;
+  border: 1px solid #2a3a5a; background: #161c2c; color: #8899cc; cursor: pointer;
+}
+.lane-adj:hover { background: #1e2a42; }
+.lane-delay { font-size: 10px; color: #ff9900; width: 30px; text-align: center; }
 .lane-queue {
   font-size: 10px; font-weight: 700; color: #ff9900;
   background: #2a2010; padding: 1px 5px; border-radius: 3px;

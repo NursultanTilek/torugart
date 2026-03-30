@@ -41,7 +41,6 @@ export class SceneService {
   private idCounter = 1; private spawnTimer = 0; private nextSpawn = 5; private z8Queue: TruckObj[] = [];
   private truckTemplate: THREE.Group | null = null; private templateReady = false;
   private tlRed!: THREE.MeshStandardMaterial; private tlGreen!: THREE.MeshStandardMaterial;
-  private panelMats: THREE.MeshStandardMaterial[] = [];
   private roadMat!: THREE.MeshStandardMaterial; private roadScroll = 0;
   private focus = new THREE.Vector3(0, 0, -8);
   private dist = 45; private pitch = 45; private yaw = 0;
@@ -353,50 +352,77 @@ export class SceneService {
     this.tlGreen.emissiveIntensity = g ? 1.8 : 0.05; this.tlGreen.color.set(g ? 0x11ff22 : 0x084408);
   }
 
+  private screenCanvases: HTMLCanvasElement[] = [];
+  private screenTextures: THREE.CanvasTexture[] = [];
+
   private buildMonitoringPanel() {
-    // Positioned on branch road between весы and zone 8 entry
-    const g = new THREE.Group(); g.position.set(8, 3.0, -2); g.rotation.y = Math.PI;
-    const a = (geo: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
-      const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m);
+    const mkScreen = (gPos: [number, number, number], gRotY: number, sw: number, sh: number) => {
+      const g = new THREE.Group(); g.position.set(...gPos); g.rotation.y = gRotY;
+      const a = (geo: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
+        const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m);
+      };
+      for (const px of [-sw / 2 - 0.15, sw / 2 + 0.15])
+        a(new THREE.CylinderGeometry(0.055, 0.075, 3.4, 10), new THREE.MeshStandardMaterial({ color: 0x1e1e24, roughness: 0.7 }), px, -1.1, 0);
+      // Dynamic screen — canvas texture with initial content
+      const cv = document.createElement('canvas'); cv.width = 512; cv.height = 320;
+      const ctx0 = cv.getContext('2d')!;
+      ctx0.fillStyle = '#0a0e18'; ctx0.fillRect(0, 0, 512, 320);
+      ctx0.fillStyle = '#88aaee'; ctx0.font = 'bold 28px Arial'; ctx0.textAlign = 'center';
+      ctx0.fillText('ПОЛОСЫ РЕГИСТРАЦИИ  0/24', 256, 32);
+      for (let i = 0; i < 6; i++) {
+        const y = 52 + i * 44;
+        ctx0.fillStyle = '#8899bb'; ctx0.font = 'bold 22px Arial'; ctx0.textAlign = 'left';
+        ctx0.fillText(`П.${i + 1}`, 10, y + 20);
+        for (let s = 0; s < 4; s++) { ctx0.fillStyle = '#2a2a3a'; ctx0.fillRect(70 + s * 90, y + 2, 80, 28); }
+        ctx0.fillStyle = '#88ccaa'; ctx0.font = '20px Arial'; ctx0.textAlign = 'right';
+        ctx0.fillText('--', 502, y + 22);
+      }
+      const tex = new THREE.CanvasTexture(cv); tex.minFilter = THREE.LinearFilter;
+      const screenMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), screenMat);
+      screen.position.set(0, 0, -0.06);
+      screen.rotation.y = Math.PI; // flip to face the same direction as group front
+      g.add(screen);
+      // Back panel
+      a(new THREE.BoxGeometry(sw + 0.1, sh + 0.1, 0.06), new THREE.MeshStandardMaterial({ color: 0x1a1a24, roughness: 0.8 }), 0, 0, 0);
+      this.scene.add(g); this.screenCanvases.push(cv); this.screenTextures.push(tex);
+      this.registerLabel(g, 'Экран-распределитель\nЗагрузка полос регистрации');
     };
-    for (const px of [-1.2, 1.2]) a(new THREE.CylinderGeometry(0.055, 0.075, 3.4, 10), new THREE.MeshStandardMaterial({ color: 0x1e1e24, roughness: 0.7 }), px, -1.1, 0);
-    a(new THREE.BoxGeometry(2.66, 1.62, 0.06), new THREE.MeshStandardMaterial({ color: 0x242430, roughness: 0.6, metalness: 0.4 }), 0, 0, 0.04);
-    a(new THREE.BoxGeometry(2.6, 1.55, 0.1), new THREE.MeshStandardMaterial({ color: 0x060610, roughness: 0.95 }));
-    this.addBoardSprite('ПОЛОСЫ', g, 0, 0.58, -0.06, 120, 30, 16);
-    this.panelMats = [];
-    for (let i = 0; i < 6; i++) {
-      const lx = THREE.MathUtils.lerp(-0.95, 0.95, i / 5);
-      this.addBoardSprite(`${i + 1}`, g, lx, 0.20, -0.06, 40, 24, 14);
-      const mat = new THREE.MeshStandardMaterial({ color: 0x18dd22, emissive: 0x0a9910, emissiveIntensity: 1.5, roughness: 0.3 });
-      const box = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.36, 0.12), mat);
-      box.position.set(lx, -0.14, -0.07); g.add(box); this.panelMats.push(mat);
-    }
-    this.scene.add(g); this.registerLabel(g, 'Экран-распределитель\nЗагрузка полос регистрации');
-    // Second monitoring panel — west side of branch road, facing incoming trucks
-    const g2 = new THREE.Group(); g2.position.set(2, 3.0, -14); g2.rotation.y = Math.PI;
-    const a2 = (geo: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
-      const m2 = new THREE.Mesh(geo, mat); m2.position.set(x, y, z); g2.add(m2);
-    };
-    for (const px of [-0.9, 0.9]) a2(new THREE.CylinderGeometry(0.05, 0.07, 3.2, 10), new THREE.MeshStandardMaterial({ color: 0x1e1e24, roughness: 0.7 }), px, -1.0, 0);
-    a2(new THREE.BoxGeometry(2.2, 1.4, 0.06), new THREE.MeshStandardMaterial({ color: 0x242430, roughness: 0.6, metalness: 0.4 }), 0, 0, 0.04);
-    a2(new THREE.BoxGeometry(2.1, 1.3, 0.1), new THREE.MeshStandardMaterial({ color: 0x060610, roughness: 0.95 }));
-    this.addBoardSprite('ПОЛОСЫ', g2, 0, 0.45, -0.06, 100, 26, 14);
-    for (let i = 0; i < 6; i++) {
-      const lx = THREE.MathUtils.lerp(-0.75, 0.75, i / 5);
-      this.addBoardSprite(`${i + 1}`, g2, lx, 0.15, -0.08, 32, 20, 12);
-      const mat2 = new THREE.MeshStandardMaterial({ color: 0x18dd22, emissive: 0x0a9910, emissiveIntensity: 1.5, roughness: 0.3 });
-      const box2 = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.36, 0.12), mat2);
-      box2.position.set(lx, -0.12, -0.08); g2.add(box2); this.panelMats.push(mat2);
-    }
-    this.scene.add(g2); this.registerLabel(g2, 'Экран-распределитель №2\nПеред входом в полосы');
+    mkScreen([8, 3.0, -2], Math.PI, 2.6, 1.6);
+    mkScreen([2, 3.0, -14], Math.PI, 2.2, 1.3);
+    this.updatePanelMats(); // draw initial state so screens aren't black
   }
 
   private updatePanelMats() {
+    const details = this.sim.laneDetails();
     const occ = this.sim.laneOccupancies();
-    for (let i = 0; i < this.panelMats.length; i++) {
-      const cnt = occ[i % 6] ?? 0, m = this.panelMats[i];
-      if (cnt >= 1) { m.color.set(0xff3322); m.emissive.set(0xaa0808); m.emissiveIntensity = 1.2; }
-      else { m.color.set(0x18dd22); m.emissive.set(0x0a9910); m.emissiveIntensity = 0.9; }
+    const total = occ.reduce((a, b) => a + b, 0);
+    for (let si = 0; si < this.screenCanvases.length; si++) {
+      const cv = this.screenCanvases[si], ctx = cv.getContext('2d')!;
+      const W = cv.width, H = cv.height;
+      // Background
+      ctx.fillStyle = '#0a0e18'; ctx.fillRect(0, 0, W, H);
+      // Title
+      ctx.fillStyle = '#88aaee'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center';
+      ctx.fillText(`ПОЛОСЫ РЕГИСТРАЦИИ  ${total}/24`, W / 2, 32);
+      // Lane rows
+      for (let i = 0; i < 6; i++) {
+        const y = 52 + i * 44, info = details[i], cnt = occ[i];
+        // Lane label
+        ctx.fillStyle = '#8899bb'; ctx.font = 'bold 22px Arial'; ctx.textAlign = 'left';
+        ctx.fillText(`П.${i + 1}`, 10, y + 20);
+        // 4 slot bars
+        for (let s = 0; s < 4; s++) {
+          const bx = 70 + s * 90, filled = s < cnt;
+          const isProcessing = s === 0 && info.processing;
+          ctx.fillStyle = filled ? (isProcessing ? '#22cc33' : '#ff9900') : '#2a2a3a';
+          ctx.fillRect(bx, y + 2, 80, 28); ctx.strokeStyle = '#1a1a2a'; ctx.strokeRect(bx, y + 2, 80, 28);
+        }
+        // Remaining time
+        ctx.fillStyle = '#88ccaa'; ctx.font = '20px Arial'; ctx.textAlign = 'right';
+        ctx.fillText(info.processing ? `${info.remaining.toFixed(0)}м` : '--', W - 10, y + 22);
+      }
+      this.screenTextures[si].needsUpdate = true;
     }
   }
 
@@ -422,14 +448,6 @@ export class SceneService {
     s.position.set(x, y, z); s.scale.set(w, h, 1); this.scene.add(s);
   }
 
-  private addBoardSprite(text: string, g: THREE.Group, x: number, y: number, z: number, cw: number, ch: number, fs: number) {
-    const c = document.createElement('canvas'); c.width = cw; c.height = ch;
-    const ctx = c.getContext('2d')!; ctx.clearRect(0, 0, cw, ch);
-    ctx.fillStyle = '#aaccff'; ctx.font = `bold ${fs}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(text, cw / 2, ch / 2);
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
-    s.position.set(x, y, z); s.scale.set(cw / 90, ch / 90, 1); g.add(s);
-  }
 
   private loadGLB(path: string, scale: number, rotY = 0): Promise<THREE.Group | null> {
     return new Promise(resolve => {
@@ -535,8 +553,10 @@ export class SceneService {
               const s = slots[Math.min(i, slots.length - 1)];
               this.moveTo(lane.trucks[i], new THREE.Vector3(s.x, 0.15, LANE_ZS[li]));
             }
+            if (lane.trucks.length) { lane.remaining[0] = this.rand(zone.minT, zone.maxT) + this.sim.laneDelays()[li]; }
+          } else {
+            if (lane.trucks.length) lane.remaining[0] = this.rand(zone.minT, zone.maxT);
           }
-          if (lane.trucks.length) lane.remaining[0] = this.rand(zone.minT, zone.maxT);
           this.advance(done);
         }
       }
@@ -590,7 +610,9 @@ export class SceneService {
     const slots = zone.slotsByLane[Math.min(li, zone.slotsByLane.length - 1)];
     const pos = slots[Math.min(si, slots.length - 1)];
     lane.trucks.push(t); lane.elapsed.push(0);
-    lane.remaining.push(si === 0 ? this.rand(zone.minT, zone.maxT) : 0);
+    const baseTime = si === 0 ? this.rand(zone.minT, zone.maxT) : 0;
+    const delay = zone.id === 8 ? this.sim.laneDelays()[li] : 0;
+    lane.remaining.push(baseTime + delay);
     t.inSlot = true; t.laneAssigned = li;
     if (zone.id === 8) this.sim.logDistribution(t.id, li);
     if (zone.id === 8) {

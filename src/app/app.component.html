@@ -17,6 +17,13 @@
       </select>
     </div>
 
+    <div class="section-title">Интенсивность</div>
+    <div class="speed-btns">
+      @for (v of intensities; track v) {
+        <button (click)="setIntensity(v)" [class.active]="sim.intensity() === v">{{ v }}x</button>
+      }
+    </div>
+
     <div class="section-title">Статистика</div>
     <div class="stat-row">
       <span>Обработано</span>
@@ -48,6 +55,9 @@
             }
           </div>
           <span class="lane-time">{{ info.processing ? info.remaining.toFixed(0) + 'м' : '--' }}</span>
+          <button class="lane-adj" (click)="sim.adjustLaneDelay($index, -5)">-5</button>
+          <span class="lane-delay">{{ sim.laneDelays()[$index] >= 0 ? '+' : '' }}{{ sim.laneDelays()[$index] }}м</span>
+          <button class="lane-adj" (click)="sim.adjustLaneDelay($index, 5)">+5</button>
         </div>
       }
     </div>
