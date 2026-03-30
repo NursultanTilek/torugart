@@ -1,0 +1,90 @@
+<div class="container">
+  <canvas #canvas class="viewport"></canvas>
+
+  <div class="panel">
+    <div class="panel-title">ТОРУГАРТ ТАМОЖНЯ</div>
+
+    <div class="section-title">Время симуляции</div>
+    <div class="stat-row">
+      <span>Текущее время</span>
+      <span class="val">{{ sim.timeString() }}</span>
+    </div>
+    <div class="time-picker">
+      <select (change)="setTime(+$any($event.target).value)">
+        @for (h of hours; track h) {
+          <option [value]="h" [selected]="sim.simHour() === h">{{ h }}:00</option>
+        }
+      </select>
+    </div>
+
+    <div class="section-title">Статистика</div>
+    <div class="stat-row">
+      <span>Обработано</span>
+      <span class="val">{{ sim.totalProcessed() }}</span>
+    </div>
+    <div class="stat-row">
+      <span>В системе</span>
+      <span class="val">{{ sim.inSystem() }}</span>
+    </div>
+    <div class="stat-row">
+      <span>Зона регистрации</span>
+      <span class="val">{{ sim.zone8Total() }} / 6</span>
+    </div>
+    @if (sim.waitingQueue() > 0) {
+      <div class="stat-row">
+        <span>В очереди</span>
+        <span class="val" style="color:#ff9900">{{ sim.waitingQueue() }}</span>
+      </div>
+    }
+
+    <div class="section-title">Полосы регистрации (6)</div>
+    <div class="lanes">
+      @for (info of sim.laneDetails(); track $index) {
+        <div class="lane-item">
+          <span class="lane-num">П.{{ $index + 1 }}</span>
+          <div class="lane-bar">
+            <div class="lane-slot" [style.background]="info.processing ? '#22cc33' : '#2a2a2a'"></div>
+          </div>
+          <span class="lane-time">{{ info.processing ? info.remaining.toFixed(0) + 'м' : '--' }}</span>
+          @if (info.queueCount > 0) {
+            <span class="lane-queue">+{{ info.queueCount }}</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="section-title">Светофор</div>
+    <div class="tl-status" [class.red]="!sim.isGreen()" [class.green]="sim.isGreen()">
+      {{ sim.isGreen() ? 'ЗЕЛЁНЫЙ' : 'КРАСНЫЙ' }}
+    </div>
+    <button class="tl-btn" (click)="toggleLight()">
+      Режим: {{ lightModeLabel() }}
+    </button>
+
+    <div class="section-title">Распределение по полосам</div>
+    <div class="dist-log">
+      @if (sim.distributionLog().length === 0) {
+        <div class="dist-empty">Ожидание ТС...</div>
+      }
+      @for (entry of sim.distributionLog(); track $index) {
+        <div class="dist-entry">
+          <span class="dist-time">{{ entry.time }}</span>
+          <span>ТС #{{ entry.truckId }}</span>
+          <span class="dist-lane">П.{{ entry.lane + 1 }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="section-title">Скорость</div>
+    <div class="speed-btns">
+      @for (s of speeds; track s) {
+        <button (click)="setSpeed(s)" [class.active]="sim.simSpeed() === s">{{ s }}x</button>
+      }
+    </div>
+    <button class="pause-btn" (click)="togglePause()">
+      {{ sim.isPaused() ? '▶ Продолжить' : '⏸ Пауза' }}
+    </button>
+
+    <div class="hint">Мышь: тащи для панорамы · Колесо: масштаб · Наведи на объект для подробностей</div>
+  </div>
+</div>
