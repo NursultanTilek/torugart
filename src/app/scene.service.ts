@@ -417,7 +417,7 @@ export class SceneService {
   private addSprite(text: string, x: number, z: number, y: number, w: number, h: number) {
     const c = document.createElement('canvas'); c.width = 256; c.height = 80;
     const ctx = c.getContext('2d')!; ctx.clearRect(0, 0, 256, 80);
-    ctx.fillStyle = '#ff2222'; ctx.font = 'bold 22px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ff2222'; ctx.font = 'bold 36px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     text.split('\n').forEach((l, i) => ctx.fillText(l, 128, 26 + i * 25));
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
     s.position.set(x, y, z); s.scale.set(w, h, 1); this.scene.add(s);
