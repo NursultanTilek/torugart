@@ -269,8 +269,6 @@ export class SceneService {
     this.addSprite('Весы №1', 5, -10, 4.0, 2.4, 0.65);
     // ГКО — exit of Zone 8, north side of exit road
     b(-20, -17, 2.5, 2.8, 2.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
-    // Убытие — departure area after ГКО
-    b(-23, -17, 2.0, 2.2, 2.0, 0xd0ccdc, 'Убытие', 'Убытие\nОтправка транспорта');
     // Процесс ГТИ — behind ГКО
     b(-26, -17, 3.0, 2.5, 2.0, 0xdcd0c0, 'Процесс ГТИ', 'Процесс ГТИ\nВремя: 2 мин');
     // Накопитель — queue area label on the branch road
