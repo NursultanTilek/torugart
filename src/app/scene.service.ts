@@ -419,7 +419,7 @@ export class SceneService {
   }
 
   private async loadTruckTemplate(): Promise<void> {
-    const cargo = await this.loadGLB('/assets/models/truck.glb', 0.5);
+    const cargo = await this.loadGLB('assets/models/truck.glb', 0.5);
     this.truckTemplate = cargo ?? this.buildProceduralTruck(0xcc3322);
     this.templateReady = true;
   }
