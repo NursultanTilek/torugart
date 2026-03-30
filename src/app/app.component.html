@@ -35,7 +35,11 @@
     </div>
     <div class="stat-row">
       <span>Зона регистрации</span>
-      <span class="val">{{ sim.zone8Total() }} / 6</span>
+      <span class="val">{{ sim.zone8Total() }}</span>
+    </div>
+    <div class="stat-row">
+      <span>Прошли контроль</span>
+      <span class="val" [style.color]="sim.trucksPastLight() >= 24 ? '#ff3333' : '#eef2ff'">{{ sim.trucksPastLight() }} / 24</span>
     </div>
     @if (sim.waitingQueue() > 0) {
       <div class="stat-row">

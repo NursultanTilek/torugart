@@ -29,13 +29,15 @@ export class SimulationService {
     { processing: false, remaining: 0, queueCount: 0 },
   ]);
   readonly zone8Total = computed(() => this.laneOccupancies().reduce((a, b) => a + b, 0));
+  // Total trucks past the traffic light (погран.контроль → весы → накопитель → zone 8)
+  readonly trucksPastLight = signal(0);
 
   // Manual traffic light override: null = auto, true = green, false = red
   readonly manualLight = signal<boolean | null>(null);
   readonly isGreen = computed(() => {
     const manual = this.manualLight();
     if (manual !== null) return manual;
-    return this.zone8Total() < 24;
+    return this.trucksPastLight() < 24;
   });
 
   // Distribution log — last 15 assignments
@@ -89,8 +91,10 @@ export class SimulationService {
   }
 
   truckEntered() { this.inSystem.update(n => n + 1); }
+  truckPassedLight() { this.trucksPastLight.update(n => n + 1); }
   truckExited() {
     this.inSystem.update(n => Math.max(0, n - 1));
+    this.trucksPastLight.update(n => Math.max(0, n - 1));
     this.totalProcessed.update(n => n + 1);
   }
 

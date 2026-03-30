@@ -480,15 +480,17 @@ export class SceneService {
     this.spawnTimer += dt;
     if (this.spawnTimer >= this.nextSpawn) {
       this.spawnTimer = 0;
-      // When green: spawn freely. When red: allow up to 5 trucks to queue at light
-      const waitingAtLight = this.trucks.filter(t => t.root.position.x > 24 && !t.inSlot).length;
-      if (this.sim.isGreen() || waitingAtLight < 5) this.spawnTruck();
+      if (!this.sim.isGreen()) return;
+      // Don't spawn if last truck hasn't moved far enough from spawn point
+      const last = this.trucks[this.trucks.length - 1];
+      if (last && last.root.position.x > 28) return;
+      this.spawnTruck();
       this.nextSpawn = this.sim.getSpawnIntervalSeconds();
     }
   }
 
   private spawnTruck() {
-    if (!this.templateReady || this.trucks.length >= 35) return;
+    if (!this.templateReady || this.trucks.length >= 40) return;
     const id = this.idCounter++; const color = TRUCK_COLORS[(id - 1) % TRUCK_COLORS.length];
     let mesh: THREE.Group;
     if (this.truckTemplate) {
@@ -575,6 +577,8 @@ export class SceneService {
   private advance(t: TruckObj) {
     t.inSlot = false; t.zoneIdx++;
     if (t.zoneIdx >= t.zonePath.length) { this.exitTruck(t); return; }
+    // Truck leaving zone 1 (погран.контроль) = passed the traffic light
+    if (t.zoneIdx === 1) this.sim.truckPassedLight();
     const zone = t.zonePath[t.zoneIdx];
     this.followPath(t, [...zone.preWps, zone.entryPt], () => this.tryEnter(t, zone));
   }
@@ -644,8 +648,8 @@ export class SceneService {
     const sd = this.sim.simSpeed(), sDt = dt * sd, redLight = !this.sim.isGreen();
     for (const t of this.trucks) {
       if (t.waitTimer > 0) { t.waitTimer -= sDt; if (t.waitTimer <= 0) this.tryEnter(t, t.zonePath[t.zoneIdx]); continue; }
-      // Stop at red light
-      if (redLight && t.root.position.x > 24 && !t.inSlot) {
+      // Stop at red light — only freeze trucks at or before погран.контроль (zone 0)
+      if (redLight && !t.inSlot && t.zoneIdx <= 0) {
         t.speed = Math.max(0, t.speed - 10 * dt); continue;
       }
       // No target — brake
