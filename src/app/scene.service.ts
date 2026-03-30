@@ -258,10 +258,16 @@ export class SceneService {
     b(20, -3, 3.0, 2.5, 2.0, 0xd8dcc8, 'Погран.контроль', 'Пограничный контроль\nФиксация АТС\nВремя: 2-3 мин');
     // Весы №1 — further down branch road, east side
     b(8, -10, 3.8, 2.2, 2.0, 0xe8e0ce, 'Весы №1', 'Весы №1\nВесогабаритный контроль\nВремя: 5 мин');
-    // ГКО — exit of Zone 8, on the edge (north side of exit road)
+    // ГКО — exit of Zone 8, north side of exit road
     b(-20, -17, 2.5, 2.8, 2.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
-    // ГТИ процесс — behind ГКО, also on the edge (north side)
-    b(-25, -17, 3.0, 2.5, 2.0, 0xdcd0c0, 'Процесс ГТИ', 'Процесс ГТИ\nВремя: 2 мин');
+    // Убытие — departure area after ГКО
+    b(-23, -17, 2.0, 2.2, 2.0, 0xd0ccdc, 'Убытие', 'Убытие\nОтправка транспорта');
+    // Процесс ГТИ — behind ГКО
+    b(-26, -17, 3.0, 2.5, 2.0, 0xdcd0c0, 'Процесс ГТИ', 'Процесс ГТИ\nВремя: 2 мин');
+    // Накопитель — queue area label on the branch road
+    this.addSprite('Накопитель', 5, -14, 1.5, 2.8, 0.65);
+    // Зона регистрации label
+    this.addSprite('Зона регистрации', -10, -7, 1.5, 3.5, 0.65);
   }
 
   private buildZone8Lanes() {
@@ -306,11 +312,20 @@ export class SceneService {
 
   private buildGate() {
     const pm = new THREE.MeshStandardMaterial({ color: 0x1e1e22, roughness: 0.75 });
+    const bm = new THREE.MeshStandardMaterial({ color: 0xdd2222 });
+    const wm = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+    // Entry gate — into zone 8
     this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -2, 1.0, -6, true);
     this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -22, 1.0, -6, true);
-    this.M(new THREE.CylinderGeometry(0.06, 0.06, 20, 8), new THREE.MeshStandardMaterial({ color: 0xdd2222 }), -12, 1.95, -6, true, 0, 0, Math.PI / 2);
-    const wm = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+    this.M(new THREE.CylinderGeometry(0.06, 0.06, 20, 8), bm, -12, 1.95, -6, true, 0, 0, Math.PI / 2);
     for (let si = 0; si < 10; si++) this.M(new THREE.BoxGeometry(0.7, 0.14, 0.14), wm, -21 + si * 2, 1.95, -5.98);
+    this.addSprite('Ворота (вход)', -12, -6, 2.8, 3.0, 0.55);
+    // Exit gate — after ГТИ, before main road
+    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -23, 1.0, -2, true);
+    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -27, 1.0, -2, true);
+    this.M(new THREE.CylinderGeometry(0.06, 0.06, 4, 8), bm, -25, 1.95, -2, true, 0, 0, Math.PI / 2);
+    for (let si = 0; si < 3; si++) this.M(new THREE.BoxGeometry(0.5, 0.14, 0.14), wm, -26.2 + si * 1.2, 1.95, -1.98);
+    this.addSprite('Ворота (выход)', -25, -2, 2.8, 3.0, 0.55);
   }
 
   private buildTrafficLight() {
@@ -325,6 +340,7 @@ export class SceneService {
     this.tlGreen = new THREE.MeshStandardMaterial({ color: 0x11dd22, emissive: 0x08aa10, emissiveIntensity: 1.5, roughness: 0.2 });
     a(new THREE.SphereGeometry(0.078, 12, 8), this.tlGreen, 0, 2.06, 0.11);
     this.scene.add(g); this.registerLabel(g, 'Светофор\nКонтроль входа ТС');
+    this.addSprite('Светофор', 25, -3, 3.0, 2.0, 0.55);
   }
 
   private updateTrafficLight() {
