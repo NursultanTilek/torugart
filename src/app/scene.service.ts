@@ -4,13 +4,13 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { SimulationService } from './simulation.service';
 
 // Zone 8: 6 horizontal lanes, trucks sit at registration booths on the LEFT side
-const LANE_ZS = [-8, -10, -12, -14, -16, -18]; // z positions for each lane (1=bottom, 6=top in 3D: more negative = further north)
-// 4 slot positions per lane: 1 at booth (processing) + 3 waiting in line
-const SLOT_XS = [-18, -14, -10, -6];
+const LANE_ZS = [-8, -12, -16, -26, -30, -34]; // z positions: lanes 1-3 (4 apart), gap for GKO, lanes 4-6
+// 4 slot positions per lane: 1 at booth (processing) + 3 waiting in line — far left in X
+const SLOT_XS = [-36, -30, -24, -18];
 const MAX_LANE = 4;
-// Main road: east→west along z=0, then branch north at x=5
-const MAIN_ROAD: [number, number][] = [[35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0]];
-const BRANCH_ROAD: [number, number][] = [[5, 0], [5, -3], [5, -6], [5, -9], [5, -12], [5, -18], [5, -22]];
+// Main road: east→west along z=0
+const MAIN_ROAD: [number, number][] = [[35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0], [-40, 0], [-50, 0], [-55, 0]];
+const BRANCH_ROAD: [number, number][] = [[5, 0], [5, -3], [5, -6], [5, -9]];
 const TRUCK_COLORS = [0xc0392b, 0x2980b9, 0x27ae60, 0xe67e22, 0x8e44ad, 0x16a085, 0xd35400, 0x2c3e50];
 
 interface TruckObj {
@@ -39,11 +39,11 @@ export class SceneService {
   private trucks: TruckObj[] = []; private zones: ZoneNode[] = [];
   private zone8!: ZoneNode; private truckGroup!: THREE.Group;
   private idCounter = 1; private spawnTimer = 0; private nextSpawn = 5; private z8Queue: TruckObj[] = [];
-  private truckTemplate: THREE.Group | null = null; private templateReady = false;
+  private truckTemplate: THREE.Group | null = null; private templateReady = false; private glbRotY = 0;
   private tlRed!: THREE.MeshStandardMaterial; private tlGreen!: THREE.MeshStandardMaterial;
   private roadMat!: THREE.MeshStandardMaterial; private roadScroll = 0;
-  private focus = new THREE.Vector3(0, 0, -8);
-  private dist = 45; private pitch = 45; private yaw = 0;
+  private focus = new THREE.Vector3(-10, 0, -10);
+  private dist = 65; private pitch = 45; private yaw = 0;
   private dragging = false; private lastXY = { x: 0, y: 0 };
   private raycaster = new THREE.Raycaster();
   private mouse = new THREE.Vector2();
@@ -70,6 +70,7 @@ export class SceneService {
     this.buildRoad(); this.buildZoneNodes(); this.buildBuildings();
     this.buildZone8Lanes();
     this.buildGate(); this.buildTrafficLight(); this.buildMonitoringPanel();
+    // buildBorderFence and buildFlagPoles removed
     this.truckGroup = new THREE.Group();
     this.scene.add(this.truckGroup);
     this.loadTruckTemplate().then(() => { this.spawnTruck(); });
@@ -180,15 +181,6 @@ export class SceneService {
 
   private buildGround() {
     this.M(new THREE.PlaneGeometry(320, 260), new THREE.MeshStandardMaterial({ color: 0xb0a080, roughness: 0.97 }), 0, 0, -10, false, -Math.PI / 2);
-    const rng = (a: number, b: number) => a + Math.random() * (b - a);
-    for (let i = 0; i < 55; i++) {
-      const rx = rng(-140, 140), rz = rng(-120, 100) - 10;
-      if (Math.abs(rx) < 25 && Math.abs(rz + 10) < 30) continue;
-      const w = rng(0.8, 4.5), h = rng(0.15, 1.0), d = rng(0.6, 3.5), v = rng(0.42, 0.62);
-      this.M(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({
-        color: new THREE.Color(v * 1.05, v, v * 0.88), roughness: 0.96, flatShading: true
-      }), rx, h / 2, rz, false, 0, rng(0, Math.PI));
-    }
   }
 
   private buildMountains() {
@@ -231,17 +223,16 @@ export class SceneService {
     };
     mkRoad(MAIN_ROAD);
     mkRoad(BRANCH_ROAD);
-    // Connecting road: branch → zone 8 (wide curve)
-    mkRoad([[5, -14], [3, -15], [0, -15], [-2, -14]]);
-    // Fill asphalt between branch and zone 8
-    this.M(new THREE.BoxGeometry(8, 0.04, 8), this.roadMat, 1, 0.02, -13);
-    // Zone 8 area road surface
-    this.M(new THREE.BoxGeometry(18, 0.04, 16), this.roadMat, -9, 0.02, -13);
-    // Exit area — large asphalt around ГКО + ГТИ + connection to main road
-    this.M(new THREE.BoxGeometry(12, 0.04, 6), this.roadMat, -22.5, 0.02, -13);
-    this.M(new THREE.BoxGeometry(6, 0.04, 14), this.roadMat, -25, 0.02, -7);
-    // Exit road: zone 8 → ГКО → ГТИ (behind) → turn south → main road
-    mkRoad([[-20, -20], [-20, -13], [-25, -13], [-25, -8], [-25, -3], [-25, 0]]);
+    // VGK area road surface
+    this.M(new THREE.BoxGeometry(8, 0.04, 8), this.roadMat, 5, 0.02, -10);
+    // Straight road from VGK west to registration lanes
+    this.M(new THREE.BoxGeometry(30, 0.04, 4), this.roadMat, -10, 0.02, -13);
+    // Zone 8 area road surface (lanes area + backyard behind booths)
+    this.M(new THREE.BoxGeometry(32, 0.04, 32), this.roadMat, -29, 0.02, -21);
+    // Exit road behind booths (backyard) connecting to exit
+    this.M(new THREE.BoxGeometry(6, 0.04, 32), this.roadMat, -44, 0.02, -21);
+    // Exit road: north from lanes to main road
+    this.M(new THREE.BoxGeometry(3.6, 0.04, 10), this.roadMat, -45, 0.02, -2);
   }
 
   private buildBuildings() {
@@ -256,21 +247,22 @@ export class SceneService {
     };
     // Погран. контроль — normal building on the side of road
     b(20, -4, 3.0, 2.5, 2.0, 0xd8dcc8, 'Погран.контроль', 'Пограничный контроль\nФиксация АТС\nВремя: 1 мин');
-    // Весы №1 — wide tunnel for 2 trucks side by side
-    const wTip = 'Весы №1\nВесогабаритный контроль\nВремя: 3-5 мин';
+    // Весы (ВГК) — two wide bays, outer walls only, ground line divider
+    const wTip = 'Весы (ВГК)\nВесогабаритный контроль\n2 полосы\nВремя: 3-5 мин';
     const wm = new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.78 });
-    const wl = this.M(new THREE.BoxGeometry(1.2, 3.0, 5.0), wm, 2.5, 1.5, -10, true); this.registerLabel(wl, wTip);
-    this.M(new THREE.BoxGeometry(1.2, 3.0, 5.0), wm, 7.5, 1.5, -10, true);
-    this.M(new THREE.BoxGeometry(6.5, 0.3, 5.0), new THREE.MeshStandardMaterial({ color: 0xd0ccc0, roughness: 0.8 }), 5, 3.15, -10, true);
-    this.addSprite('Весы', 5, -10, 4.0, 2.4, 0.65);
-    // ГКО — exit of Zone 8, north side of exit road
-    b(-20, -17, 2.5, 2.8, 2.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
-    // Процесс ГТИ — behind ГКО
-    b(-26, -17, 3.0, 2.5, 2.0, 0xdcd0c0, 'Процесс ГТИ', 'Процесс ГТИ\nВремя: 2 мин');
-    // Накопитель — queue area label on the branch road
-    // this.addSprite('Накопитель', 5, -14, 1.5, 2.8, 0.65);
+    // Left wall (x=1.5) and right wall (x=8.5) — shorter, open north/south for trucks
+    const wl = this.M(new THREE.BoxGeometry(0.3, 3.0, 3.0), wm, 1.5, 1.5, -10, true); this.registerLabel(wl, wTip);
+    this.M(new THREE.BoxGeometry(0.3, 3.0, 3.0), wm, 8.5, 1.5, -10, true);
+    // Ground center line divider
+    this.M(new THREE.BoxGeometry(0.08, 0.06, 3.0), new THREE.MeshStandardMaterial({ color: 0xffff88 }), 5, 0.03, -10);
+    // Roof
+    this.M(new THREE.BoxGeometry(7.5, 0.25, 4.0), new THREE.MeshStandardMaterial({ color: 0xd0ccc0, roughness: 0.8 }), 5, 3.15, -10, true);
+    this.addSprite('Весы (ВГК)', 5, -10, 4.0, 3.0, 0.8);
+    // ГКО — exit of Zone 8
+    // ГКО — in the gap between lane 3 (z=-16) and lane 4 (z=-26)
+    b(SLOT_XS[0] - 3, -21, 3.0, 2.8, 4.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
     // Зона регистрации label
-    this.addSprite('Зона регистрации', -10, -7, 1.5, 3.5, 0.65);
+    this.addSprite('Зона регистрации', -28, -5, 2.5, 3.5, 0.65);
   }
 
   private buildZone8Lanes() {
@@ -278,19 +270,25 @@ export class SceneService {
     const lc = [0xc0d8ff, 0xccf0b8, 0xc0d8ff, 0xccf0b8, 0xc0d8ff, 0xccf0b8];
     for (let li = 0; li < LANE_ZS.length; li++) {
       const lz = LANE_ZS[li];
-      // Horizontal lane strip
-      this.M(new THREE.BoxGeometry(14, 0.05, 1.4), new THREE.MeshStandardMaterial({ color: lc[li], transparent: true, opacity: 0.35 }), -9, 0.025, lz);
-      // Lane divider line
-      if (li < LANE_ZS.length - 1) this.M(new THREE.BoxGeometry(14, 0.02, 0.06), lineM, -9, 0.03, (lz + LANE_ZS[li + 1]) / 2);
-      // Slot marker
+      // Lane strip — fits between booth gaps and within asphalt
+      const stripW = SLOT_XS[SLOT_XS.length - 1] - SLOT_XS[0] + 2;
+      const stripCx = (SLOT_XS[0] + SLOT_XS[SLOT_XS.length - 1]) / 2;
+      this.M(new THREE.BoxGeometry(stripW, 0.05, 2.4), new THREE.MeshStandardMaterial({ color: lc[li], transparent: true, opacity: 0.35 }), stripCx, 0.025, lz);
+      if (li < LANE_ZS.length - 1) this.M(new THREE.BoxGeometry(stripW, 0.02, 0.06), lineM, stripCx, 0.03, (lz + LANE_ZS[li + 1]) / 2);
       this.M(new THREE.BoxGeometry(0.08, 0.02, 1.2), lineM, SLOT_XS[0], 0.03, lz);
-      // Registration booth at left end of each lane
-      this.addBooth(SLOT_XS[0] - 1.5, lz, `П.${li + 1}`);
+      // Booth sits BETWEEN this lane and next (offset by half spacing toward next lane)
+      if (li < LANE_ZS.length - 1) {
+        const boothZ = (lz + LANE_ZS[li + 1]) / 2;
+        if (li !== 2) this.addBooth(SLOT_XS[0] - 3, boothZ, `П.${li + 1}`);
+      }
     }
-    // Overhead canopy
-    const ch = LANE_ZS[0] - LANE_ZS[LANE_ZS.length - 1] + 3;
+    // First booth above lane 1, last booth below lane 6
+    this.addBooth(SLOT_XS[0] - 3, LANE_ZS[0] + 2, 'П.0');
+    this.addBooth(SLOT_XS[0] - 3, LANE_ZS[LANE_ZS.length - 1] - 2, `П.${LANE_ZS.length}`);
+    // One continuous overhead canopy across all lanes + booths above/below
+    const ch = LANE_ZS[0] - LANE_ZS[LANE_ZS.length - 1] + 8;
     this.M(new THREE.BoxGeometry(2.6, 0.22, ch), new THREE.MeshStandardMaterial({ color: 0x2c4460, roughness: 0.7 }),
-      SLOT_XS[0] - 1.5, 4.0, (LANE_ZS[0] + LANE_ZS[LANE_ZS.length - 1]) / 2, true);
+      SLOT_XS[0] - 3, 4.0, (LANE_ZS[0] + LANE_ZS[LANE_ZS.length - 1]) / 2, true);
   }
 
   private addBooth(x: number, z: number, label: string) {
@@ -305,7 +303,7 @@ export class SceneService {
     const postM = new THREE.MeshStandardMaterial({ color: 0xc0b8a8, roughness: 0.9 });
     const railM = new THREE.MeshStandardMaterial({ color: 0xb0a898, roughness: 0.85 });
     // Fence around zone 8 compound
-    for (const [fx, fzStart, fzEnd] of [[-2, -6, -20], [-22, -6, -20]] as [number, number, number][]) {
+    for (const [fx, fzStart, fzEnd] of [[-16, -6, -36], [-42, -6, -36]] as [number, number, number][]) {
       for (let fz = fzStart; fz >= fzEnd; fz -= 2.5) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, fx, 0.8, fz, true);
       const len = Math.abs(fzEnd - fzStart);
       this.M(new THREE.BoxGeometry(0.1, 0.1, len), railM, fx, 1.4, (fzStart + fzEnd) / 2);
@@ -317,18 +315,13 @@ export class SceneService {
     const pm = new THREE.MeshStandardMaterial({ color: 0x1e1e22, roughness: 0.75 });
     const bm = new THREE.MeshStandardMaterial({ color: 0xdd2222 });
     const wm = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
-    // Entry gate — into zone 8
-    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -2, 1.0, -6, true);
-    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -22, 1.0, -6, true);
-    this.M(new THREE.CylinderGeometry(0.06, 0.06, 20, 8), bm, -12, 1.95, -6, true, 0, 0, Math.PI / 2);
-    for (let si = 0; si < 10; si++) this.M(new THREE.BoxGeometry(0.7, 0.14, 0.14), wm, -21 + si * 2, 1.95, -5.98);
-    //this.addSprite('Ворота (вход)', -12, -6, 2.8, 3.0, 0.55);
-    // Exit gate — after ГТИ, before main road
-    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -23, 1.0, -2, true);
-    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -27, 1.0, -2, true);
-    this.M(new THREE.CylinderGeometry(0.06, 0.06, 4, 8), bm, -25, 1.95, -2, true, 0, 0, Math.PI / 2);
-    for (let si = 0; si < 3; si++) this.M(new THREE.BoxGeometry(0.5, 0.14, 0.14), wm, -26.2 + si * 1.2, 1.95, -1.98);
-    this.addSprite('Ворота (выход)', -25, -2, 2.8, 3.0, 0.55);
+    // Entry into zone 8 — no gate barrier needed
+    // Exit gate — west end of lanes, before main road
+    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -43, 1.0, -2, true);
+    this.M(new THREE.CylinderGeometry(0.07, 0.08, 2.0, 8), pm, -47, 1.0, -2, true);
+    this.M(new THREE.CylinderGeometry(0.06, 0.06, 4, 8), bm, -45, 1.95, -2, true, 0, 0, Math.PI / 2);
+    for (let si = 0; si < 3; si++) this.M(new THREE.BoxGeometry(0.5, 0.14, 0.14), wm, -46.2 + si * 1.2, 1.95, -1.98);
+    this.addSprite('Ворота (выход)', -45, -2, 2.8, 3.0, 0.55);
   }
 
   private buildTrafficLight() {
@@ -368,7 +361,7 @@ export class SceneService {
       const ctx0 = cv.getContext('2d')!;
       ctx0.fillStyle = '#0a0e18'; ctx0.fillRect(0, 0, 512, 320);
       ctx0.fillStyle = '#88aaee'; ctx0.font = 'bold 28px Arial'; ctx0.textAlign = 'center';
-      ctx0.fillText('ПОЛОСЫ РЕГИСТРАЦИИ  0/24', 256, 32);
+      ctx0.fillText(`ПОЛОСЫ РЕГИСТРАЦИИ  0/${this.sim.maxCapacity()}`, 256, 32);
       for (let i = 0; i < 6; i++) {
         const y = 52 + i * 44;
         ctx0.fillStyle = '#8899bb'; ctx0.font = 'bold 22px Arial'; ctx0.textAlign = 'left';
@@ -388,8 +381,8 @@ export class SceneService {
       this.scene.add(g); this.screenCanvases.push(cv); this.screenTextures.push(tex);
       this.registerLabel(g, 'Экран-распределитель\nЗагрузка полос регистрации');
     };
-    mkScreen([8, 3.0, -2], Math.PI, 2.6, 1.6);
-    mkScreen([2, 3.0, -14], Math.PI, 2.2, 1.3);
+    mkScreen([16, 3.0, -4], Math.PI, 2.6, 1.6);
+    mkScreen([-1, 3.0, -15], Math.PI, 2.2, 1.3);
     this.updatePanelMats(); // draw initial state so screens aren't black
   }
 
@@ -404,7 +397,7 @@ export class SceneService {
       ctx.fillStyle = '#0a0e18'; ctx.fillRect(0, 0, W, H);
       // Title
       ctx.fillStyle = '#88aaee'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center';
-      ctx.fillText(`ПОЛОСЫ РЕГИСТРАЦИИ  ${total}/24`, W / 2, 32);
+      ctx.fillText(`ПОЛОСЫ РЕГИСТРАЦИИ  ${total}/${this.sim.maxCapacity()}`, W / 2, 32);
       // Lane rows
       for (let i = 0; i < 6; i++) {
         const y = 52 + i * 44, info = details[i], cnt = occ[i];
@@ -429,23 +422,21 @@ export class SceneService {
   private buildFlagPoles() {
     const pm = new THREE.MeshStandardMaterial({ color: 0xc8c8c8, metalness: 0.6, roughness: 0.4 });
     const fm = new THREE.MeshStandardMaterial({ color: 0xd50000, side: THREE.DoubleSide, roughness: 0.7 });
-    for (const [x, z] of [[-2, -10], [-22, -10]]) {
+    for (const [x, z] of [[-20, -8], [-40, -36]]) {
       this.M(new THREE.CylinderGeometry(0.045, 0.055, 6.0, 8), pm, x, 3.0, z, true);
       this.M(new THREE.PlaneGeometry(1.0, 0.62), fm, x + 0.5, 5.7, z);
     }
   }
 
   private addSprite(text: string, x: number, z: number, y: number, w: number, h: number) {
-    const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
     const ctx = c.getContext('2d')!;
-    // Dark background for readability
-    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.beginPath();
-    ctx.roundRect(8, 8, 496, 112, 16); ctx.fill();
-    // White text on dark background
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 36px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    text.split('\n').forEach((l, i) => ctx.fillText(l, 256, 50 + i * 40));
+    ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.beginPath();
+    ctx.roundRect(12, 12, 1000, 232, 20); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 56px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    text.split('\n').forEach((l, i) => ctx.fillText(l, 512, 96 + i * 72));
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
-    s.position.set(x, y, z); s.scale.set(w, h, 1); this.scene.add(s);
+    s.position.set(x, y, z); s.scale.set(w * 1.4, h * 1.4, 1); this.scene.add(s);
   }
 
 
@@ -461,18 +452,20 @@ export class SceneService {
   }
 
   private async loadTruckTemplate(): Promise<void> {
-    const cargo = await this.loadGLB('assets/models/truck.glb', 0.5);
+    const cargo = await this.loadGLB('assets/models/truck.glb', 0.7);
+    if (cargo) { this.glbRotY = 0; }
     this.truckTemplate = cargo ?? this.buildProceduralTruck(0xcc3322);
     this.templateReady = true;
   }
 
   private buildProceduralTruck(color: number): THREE.Group {
-    const g = new THREE.Group(); const Y = 0.1;
+    const g = new THREE.Group(); const Y = 0.12;
     const tmat = new THREE.MeshStandardMaterial({ color, roughness: 0.7, metalness: 0.12 });
-    const trailer = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.38, 0.48), tmat);
-    trailer.position.set(0.45, Y + 0.19, 0); trailer.castShadow = true; g.add(trailer);
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.44, 0.44), new THREE.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.28 }));
-    cab.position.set(1.1, Y + 0.22, 0); cab.castShadow = true; g.add(cab);
+    // Truck faces +Z: cab at +Z, trailer behind at -Z
+    const trailer = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.55, 1.4), tmat);
+    trailer.position.set(0, Y + 0.28, -0.35); trailer.castShadow = true; g.add(trailer);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.6, 0.6), new THREE.MeshStandardMaterial({ color, roughness: 0.42, metalness: 0.28 }));
+    cab.position.set(0, Y + 0.3, 0.7); cab.castShadow = true; g.add(cab);
     return g;
   }
 
@@ -495,6 +488,7 @@ export class SceneService {
     let mesh: THREE.Group;
     if (this.truckTemplate) {
       mesh = this.truckTemplate.clone();
+      if (this.glbRotY && mesh.children[0]) mesh.children[0].rotation.y = this.glbRotY;
       mesh.traverse(o => {
         if ((o as THREE.Mesh).isMesh) {
           const orig = (o as THREE.Mesh).material as THREE.MeshStandardMaterial;
@@ -523,20 +517,16 @@ export class SceneService {
       lanes: slotsPerLane.map(() => ({ trucks: [], elapsed: [], remaining: [] })),
       sequential: seq, maxPerLane: mpl, nextLane: 0,
     });
-    // Zone 1: Погран.контроль — tunnel, 2 lanes spread apart (0.5-1 min)
-    this.zones.push(make(1, 0.5, 1, 20, 0, [[[20, -1.2]], [[20, 1.2]]]));
-    // Zone 2: Весы — 2 lanes, entry before slots so trucks don't reverse
-    this.zones.push(make(2, 3, 5, 5, -8, [[[5, -10]], [[5, -11]]],
-      [[10, 0], [7, 0], [6, -1], [5, -2.5], [5, -5]], false, 1));
-    // Zone 3: Накопитель (5 min) — smooth transition down branch
-    this.zones.push(make(3, 3, 5, 3, -14, [[[3, -14]]], [[5, -12], [4.5, -13], [4, -14]]));
-    // Zone 8: Registration — entry at top-right corner so trucks go DOWN then LEFT
-    const z8 = make(8, 20, 25, -2, -6,
+    // Zone 1: Погран.контроль — stays on road center (0.5-1 min)
+    this.zones.push(make(1, 0.5, 1, 20, 0, [[[20, 0]]]));
+    // Zone 2: Весы (ВГК) — 2 bays at x=3.5 and x=6.5, z=-10, entry from north
+    this.zones.push(make(2, 3, 5, 5, -6, [[[3.5, -10]], [[6.5, -10]]],
+      [[17, 0], [10, 0], [5, 0], [5, -3], [5, -6]], false, 1));
+    // Zone 8: Registration — 6 lanes far west, straight west road from VGK
+    const z8 = make(8, 20, 25, -15, -13,
       z8Slots.map(lane => lane.map(v => [v.x, v.z] as [number, number])),
-      [[3, -14], [1, -14], [0, -10], [-1, -7], [-2, -6]], false, MAX_LANE);
+      [[5, -13], [0, -13], [-5, -13], [-10, -13], [-15, -13]], false, MAX_LANE);
     this.zones.push(z8); this.zone8 = z8;
-    // Zone 5: ГКО → ГТИ, smooth exit path (2-3 min)
-    this.zones.push(make(5, 2, 3, -25, -13, [[[-25, -13]]], [[-19, -13], [-22, -13]]));
   }
 
   private tickZones(dt: number) {
@@ -604,7 +594,7 @@ export class SceneService {
         if (!this.z8Queue.includes(t)) this.z8Queue.push(t);
         const qi = this.z8Queue.indexOf(t);
         // Queue near zone 8 entry, spaced 2.5 units going right (east)
-        this.moveTo(t, new THREE.Vector3(-2 + (qi + 1) * 2.5, 0.15, -6));
+        this.moveTo(t, new THREE.Vector3(-15 + (qi + 1) * 2.5, 0.15, -13));
       }
       return;
     }
@@ -621,10 +611,16 @@ export class SceneService {
     if (zone.id === 8) this.sim.logDistribution(t.id, li);
     if (zone.id === 8) {
       const laneZ = LANE_ZS[li];
-      // Truck is at (-2, -6). Go DOWN to lane's z, then LEFT to slot
+      // Route: go south to lane Z at entry x, then west to slot
       this.followPath(t, [
-        new THREE.Vector3(-2, 0.15, laneZ),
+        new THREE.Vector3(-16, 0.15, laneZ),
         new THREE.Vector3(pos.x, 0.15, laneZ),
+      ], () => {});
+    } else if (zone.id === 2) {
+      // VGK: move to bay x at entry z=-7, then straight south through building to slot
+      this.followPath(t, [
+        new THREE.Vector3(pos.x, 0.15, -7),
+        new THREE.Vector3(pos.x, 0.15, pos.z),
       ], () => {});
     } else {
       this.moveTo(t, pos);
@@ -633,10 +629,11 @@ export class SceneService {
 
   private exitTruck(t: TruckObj) {
     this.sim.truckExited();
+    const lz = t.laneAssigned >= 0 ? LANE_ZS[t.laneAssigned] : -15;
     this.followPath(t, [
-      new THREE.Vector3(-25, 0.15, -10), new THREE.Vector3(-25, 0.15, -6),
-      new THREE.Vector3(-25, 0.15, -2), new THREE.Vector3(-25.5, 0.15, -0.5),
-      new THREE.Vector3(-27, 0.15, 0), new THREE.Vector3(-32, 0.15, 0),
+      new THREE.Vector3(-40, 0.15, lz), new THREE.Vector3(-45, 0.15, lz),
+      new THREE.Vector3(-45, 0.15, -2), new THREE.Vector3(-45, 0.15, 0),
+      new THREE.Vector3(-50, 0.15, 0),
     ], () => { this.truckGroup.remove(t.root); this.trucks = this.trucks.filter(x => x !== t); });
   }
 
@@ -656,8 +653,8 @@ export class SceneService {
       if (!t.target) { t.speed = Math.max(0, t.speed - 10 * dt); continue; }
       const dx = t.target.x - t.root.position.x, dz = t.target.z - t.root.position.z;
       const dist = Math.hypot(dx, dz);
-      // Reached target
-      if (dist < 0.3) {
+      // Reached target — clamp step to avoid overshooting
+      if (dist < 0.5) {
         t.root.position.x = t.target.x; t.root.position.z = t.target.z;
         t.speed = 0; t.target = null;
         if (t.wpQueue.length) this.stepPath(t);
@@ -668,19 +665,16 @@ export class SceneService {
       const dirX = dx / dist, dirZ = dz / dist;
       // Speed: accelerate, slow near target
       const maxSpd = 8 * sd;
-      const desired = Math.min(maxSpd, maxSpd * Math.min(dist / 2.0, 1));
-      t.speed += (desired - t.speed) * Math.min(5 * dt, 0.3);
+      const desired = Math.min(maxSpd, maxSpd * Math.min(dist / 3.0, 1));
+      t.speed += (desired - t.speed) * Math.min(8 * dt, 0.5);
       t.speed = THREE.MathUtils.clamp(t.speed, 0, maxSpd);
-      // Move
-      const step = t.speed * dt;
+      // Move — clamp step to prevent overshooting
+      const step = Math.min(t.speed * dt, dist - 0.4);
+      if (step <= 0) { t.speed = 0; continue; }
       t.root.position.x += dirX * step;
       t.root.position.z += dirZ * step;
-      // Face direction — smooth rotation
-      const targetAngle = Math.atan2(dirX, dirZ);
-      let diff = targetAngle - t.root.rotation.y;
-      while (diff > Math.PI) diff -= 2 * Math.PI;
-      while (diff < -Math.PI) diff += 2 * Math.PI;
-      t.root.rotation.y += diff * Math.min(4 * dt, 0.2);
+      // Face direction — use standard +Z forward formula
+      t.root.rotation.y = Math.atan2(dirX, dirZ);
     }
   }
 

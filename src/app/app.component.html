@@ -39,7 +39,7 @@
     </div>
     <div class="stat-row">
       <span>Прошли контроль</span>
-      <span class="val" [style.color]="sim.trucksPastLight() >= 24 ? '#ff3333' : '#eef2ff'">{{ sim.trucksPastLight() }} / 24</span>
+      <span class="val" [style.color]="sim.trucksPastLight() >= sim.maxCapacity() ? '#ff3333' : '#eef2ff'">{{ sim.trucksPastLight() }} / {{ sim.maxCapacity() }}</span>
     </div>
     @if (sim.waitingQueue() > 0) {
       <div class="stat-row">
@@ -73,6 +73,13 @@
     <button class="tl-btn" (click)="toggleLight()">
       Режим: {{ lightModeLabel() }}
     </button>
+
+    <div class="section-title">Макс. ёмкость</div>
+    <div class="speed-btns" style="justify-content:center;align-items:center">
+      <button (click)="sim.setMaxCapacity(sim.maxCapacity() - 2)">-2</button>
+      <span class="val" style="min-width:32px;text-align:center">{{ sim.maxCapacity() }}</span>
+      <button (click)="sim.setMaxCapacity(sim.maxCapacity() + 2)">+2</button>
+    </div>
 
     <div class="section-title">Распределение по полосам</div>
     <div class="dist-log">

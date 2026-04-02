@@ -1,0 +1,160 @@
+- generic [ref=e5]:
+  - generic [ref=e6]: ТОРУГАРТ ТАМОЖНЯ
+  - generic [ref=e7]: Время симуляции
+  - generic [ref=e8]:
+    - generic [ref=e9]: Текущее время
+    - generic [ref=e10]: 11:35
+  - combobox [ref=e12] [cursor=pointer]:
+    - option "0:00"
+    - option "1:00"
+    - option "2:00"
+    - option "3:00"
+    - option "4:00"
+    - option "5:00"
+    - option "6:00"
+    - option "7:00"
+    - option "8:00"
+    - option "9:00"
+    - option "10:00"
+    - option "11:00" [selected]
+    - option "12:00"
+    - option "13:00"
+    - option "14:00"
+    - option "15:00"
+    - option "16:00"
+    - option "17:00"
+    - option "18:00"
+    - option "19:00"
+    - option "20:00"
+    - option "21:00"
+    - option "22:00"
+    - option "23:00"
+  - generic [ref=e13]: Интенсивность
+  - generic [ref=e14]:
+    - button "1x" [ref=e15] [cursor=pointer]
+    - button "2x" [ref=e16] [cursor=pointer]
+    - button "4x" [active] [ref=e17] [cursor=pointer]
+    - button "6x" [ref=e18] [cursor=pointer]
+    - button "12x" [ref=e19] [cursor=pointer]
+    - button "24x" [ref=e20] [cursor=pointer]
+  - generic [ref=e21]: Статистика
+  - generic [ref=e22]:
+    - generic [ref=e23]: Обработано
+    - generic [ref=e24]: "9"
+  - generic [ref=e25]:
+    - generic [ref=e26]: В системе
+    - generic [ref=e27]: "10"
+  - generic [ref=e28]:
+    - generic [ref=e29]: Зона регистрации
+    - generic [ref=e30]: "4"
+  - generic [ref=e31]:
+    - generic [ref=e32]: Прошли контроль
+    - generic [ref=e33]: 8 / 24
+  - generic [ref=e34]: Полосы регистрации (6)
+  - generic [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e37]: П.1
+      - generic [ref=e43]: 7м
+      - button "-5" [ref=e44] [cursor=pointer]
+      - generic [ref=e45]: +0м
+      - button "+5" [ref=e46] [cursor=pointer]
+    - generic [ref=e47]:
+      - generic [ref=e48]: П.2
+      - generic [ref=e54]: "--"
+      - button "-5" [ref=e55] [cursor=pointer]
+      - generic [ref=e56]: +0м
+      - button "+5" [ref=e57] [cursor=pointer]
+    - generic [ref=e58]:
+      - generic [ref=e59]: П.3
+      - generic [ref=e65]: 10м
+      - button "-5" [ref=e66] [cursor=pointer]
+      - generic [ref=e67]: +0м
+      - button "+5" [ref=e68] [cursor=pointer]
+    - generic [ref=e69]:
+      - generic [ref=e70]: П.4
+      - generic [ref=e76]: 16м
+      - button "-5" [ref=e77] [cursor=pointer]
+      - generic [ref=e78]: +0м
+      - button "+5" [ref=e79] [cursor=pointer]
+    - generic [ref=e80]:
+      - generic [ref=e81]: П.5
+      - generic [ref=e87]: "--"
+      - button "-5" [ref=e88] [cursor=pointer]
+      - generic [ref=e89]: +0м
+      - button "+5" [ref=e90] [cursor=pointer]
+    - generic [ref=e91]:
+      - generic [ref=e92]: П.6
+      - generic [ref=e98]: 18м
+      - button "-5" [ref=e99] [cursor=pointer]
+      - generic [ref=e100]: +0м
+      - button "+5" [ref=e101] [cursor=pointer]
+  - generic [ref=e102]: Светофор
+  - generic [ref=e103]: ЗЕЛЁНЫЙ
+  - 'button "Режим: АВТО" [ref=e104] [cursor=pointer]'
+  - generic [ref=e105]: Макс. ёмкость
+  - generic [ref=e106]:
+    - button "-6" [ref=e107] [cursor=pointer]
+    - generic [ref=e108]: "24"
+    - button "+6" [ref=e109] [cursor=pointer]
+  - generic [ref=e110]: Распределение по полосам
+  - generic:
+    - generic [ref=e120]:
+      - generic [ref=e121]: 11:32
+      - generic [ref=e122]: "ТС #13"
+      - generic [ref=e123]: П.6
+    - generic [ref=e124]:
+      - generic [ref=e125]: 11:30
+      - generic [ref=e126]: "ТС #12"
+      - generic [ref=e127]: П.4
+    - generic [ref=e128]:
+      - generic [ref=e129]: 11:24
+      - generic [ref=e130]: "ТС #11"
+      - generic [ref=e131]: П.3
+    - generic [ref=e132]:
+      - generic [ref=e133]: 11:18
+      - generic [ref=e134]: "ТС #10"
+      - generic [ref=e135]: П.1
+    - generic [ref=e136]:
+      - generic [ref=e137]: 11:13
+      - generic [ref=e138]: "ТС #8"
+      - generic [ref=e139]: П.2
+    - generic [ref=e140]:
+      - generic [ref=e141]: 11:12
+      - generic [ref=e142]: "ТС #9"
+      - generic [ref=e143]: П.5
+    - generic [ref=e144]:
+      - generic [ref=e145]: 11:03
+      - generic [ref=e146]: "ТС #7"
+      - generic [ref=e147]: П.4
+    - generic [ref=e148]:
+      - generic [ref=e149]: 10:59
+      - generic [ref=e150]: "ТС #6"
+      - generic [ref=e151]: П.3
+    - generic [ref=e152]:
+      - generic [ref=e153]: 10:53
+      - generic [ref=e154]: "ТС #5"
+      - generic [ref=e155]: П.1
+    - generic [ref=e156]:
+      - generic [ref=e157]: 10:50
+      - generic [ref=e158]: "ТС #4"
+      - generic [ref=e159]: П.2
+    - generic [ref=e160]:
+      - generic [ref=e161]: 10:30
+      - generic [ref=e162]: "ТС #3"
+      - generic [ref=e163]: П.1
+    - generic [ref=e164]:
+      - generic [ref=e165]: 10:04
+      - generic [ref=e166]: "ТС #2"
+      - generic [ref=e167]: П.2
+    - generic [ref=e168]:
+      - generic [ref=e169]: 08:13
+      - generic [ref=e170]: "ТС #1"
+      - generic [ref=e171]: П.1
+  - generic [ref=e112]: Скорость
+  - generic [ref=e113]:
+    - button "1x" [ref=e114] [cursor=pointer]
+    - button "2x" [ref=e115] [cursor=pointer]
+    - button "5x" [ref=e116] [cursor=pointer]
+    - button "10x" [ref=e117] [cursor=pointer]
+  - button "⏸ Пауза" [ref=e118] [cursor=pointer]
+  - generic [ref=e119]: "Мышь: тащи для панорамы · Колесо: масштаб · Наведи на объект для подробностей"

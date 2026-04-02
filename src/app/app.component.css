@@ -67,6 +67,10 @@
 .tl-status.red   { background: #300a0a; color: #ff3333; border: 1px solid #ff3333; }
 
 .speed-btns { display: flex; gap: 6px; }
+.capacity-btns { display: flex; gap: 6px; justify-content: center; align-items: center; }
+.capacity-btns button { padding: 6px 12px; border-radius: 5px; border: 1px solid #2a3a5a; background: #161c2c; color: #8899cc; cursor: pointer; font-size: 13px; }
+.capacity-btns button:hover { background: #1e2a42; color: #aabbee; }
+.capacity-btns .val { min-width: 32px; text-align: center; }
 .speed-btns button {
   flex: 1; padding: 6px 0; border-radius: 5px;
   border: 1px solid #2a3a5a; background: #161c2c;

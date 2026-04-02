@@ -1,0 +1,536 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - text: 
+      - link "Go to the mainpage" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+      - list [ref=e21]:
+        - listitem [ref=e22]:
+          - link "Explore ▼" [ref=e23] [cursor=pointer]:
+            - /url: /3d-models/popular
+        - listitem [ref=e24]:
+          - link "For business ▼" [ref=e25] [cursor=pointer]:
+            - /url: /enterprise?ref=header
+        - listitem [ref=e26]:
+          - link "Buy on Fab" [ref=e27] [cursor=pointer]:
+            - /url: https://fab.com
+      - generic [ref=e29]:
+        - generic [ref=e30] [cursor=pointer]: 
+        - textbox "Search" [ref=e31]:
+          - /placeholder: Search 3D models
+        - text: 
+        - generic: /
+      - generic [ref=e32]:
+        - text: 
+        - link "login" [ref=e33] [cursor=pointer]:
+          - /url: /login
+          - generic [ref=e34]: login
+        - link "Sign Up" [ref=e35] [cursor=pointer]:
+          - /url: /signup
+          - generic [ref=e36]: Sign Up
+        - link " Upload" [ref=e37] [cursor=pointer]:
+          - /url: /signup?next=%2Ffeed%23upload
+          - generic [ref=e38]: 
+          - generic [ref=e39]: Upload
+  - text: ▼       ▼
+  - main [ref=e40]:
+    - generic [ref=e42]:
+      - generic [ref=e44]:
+        - iframe [active] [ref=e46]:
+          - main "sketchfab-viewer" [ref=f1e2]:
+            - generic:
+              - generic:
+                - heading "Semi truck" [level=1]:
+                  - link "Semi truck" [ref=f1e3] [cursor=pointer]:
+                    - /url: https://sketchfab.com/3d-models/semi-truck-9290154411f94d90b274bc5a6592b7ea
+            - text: 
+            - generic [ref=f1e4]:
+              - generic "3D view of Semi truck" [ref=f1e5]
+              - generic:
+                - generic:
+                  - img "Loading 3D Model"
+                  - generic:
+                    - paragraph: Loading 3D model
+              - generic:
+                - generic:
+                  - generic "close": 
+                  - paragraph: Model is too heavy for your device and can not be rendered properly
+                - text:  
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 
+                      - text: Model Inspector
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic "Play Animation": 
+                      - text: 
+                      - generic: 00:00.00
+                      - generic:
+                        - paragraph
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - radio ""
+                                - generic:
+                                  - generic: 
+                                - text: Repeat one
+                              - generic:
+                                - radio ""
+                                - generic:
+                                  - generic: 
+                                - text: Repeat all
+                              - generic:
+                                - radio ""
+                                - generic:
+                                  - generic: 
+                                - text: No repeat
+                            - generic:
+                              - generic:
+                                - radio "x0.1"
+                                - generic: x0.1
+                                - text: Speed x0.1
+                              - generic:
+                                - radio "x0.5"
+                                - generic: x0.5
+                                - text: Speed x0.5
+                              - generic:
+                                - radio "x1"
+                                - generic: x1
+                                - text: Speed x1
+                              - generic:
+                                - radio "x2"
+                                - generic: x2
+                                - text: Speed x2
+                          - list
+                  - text:    Hide annotations  Start autopilot
+                  - generic:
+                    - generic [ref=f1e6] [cursor=pointer]:
+                      - generic: 
+                      - text: Help
+                    - text: 
+                    - generic [ref=f1e7] [cursor=pointer]:
+                      - generic: 
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - paragraph: Navigation
+                              - paragraph: Orbit
+                            - generic:
+                              - paragraph: Textures
+                              - paragraph: HD
+                      - generic: HD
+                      - text: Settings
+                    - generic [ref=f1e8] [cursor=pointer]:
+                      - generic: 
+                      - text: Model Inspector (i)
+                    - generic [ref=f1e9] [cursor=pointer]:
+                      - generic: 
+                      - text: View in VR
+                    - generic [ref=f1e10] [cursor=pointer]:
+                      - generic: 
+                      - text: Theatre Mode
+                    - generic [ref=f1e11] [cursor=pointer]:
+                      - generic: 
+                      - text: Fullscreen (f)
+                - generic:
+                  - generic:
+                    - generic:
+                      - text: click & hold
+                      - text: to rotate
+            - text:  Fullscreen (f)
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - heading "Semi truck 3D Model" [level=1] [ref=e50]:
+              - generic [ref=e52]: Semi truck
+              - generic [ref=e53]: 3D Model
+            - generic [ref=e54]:
+              - generic [ref=e55]:
+                - link "Avatar of CoolGuywhodosevehicles" [ref=e56] [cursor=pointer]:
+                  - /url: /CoolGuywhodosevehicles
+                  - img "Avatar of CoolGuywhodosevehicles" [ref=e60]
+                - generic [ref=e61]:
+                  - link "Coolguywhodosevehicles/andskibidi" [ref=e64] [cursor=pointer]:
+                    - /url: /CoolGuywhodosevehicles
+                    - generic "Coolguywhodosevehicles/andskibidi" [ref=e66]
+                  - button "Follow" [ref=e68] [cursor=pointer]:
+                    - generic [ref=e69]: Follow
+              - generic [ref=e70]:
+                - generic [ref=e71]:
+                  - generic [ref=e72]: 
+                  - generic [ref=e73]: "7"
+                  - generic: 7 Downloads
+                - generic [ref=e74]:
+                  - generic [ref=e75]: 
+                  - generic [ref=e76]: "21"
+                  - generic: 21 Views
+                - generic [ref=e77] [cursor=pointer]:
+                  - text: 
+                  - generic [ref=e78]: "0"
+                  - generic: Like
+            - generic [ref=e80]:
+              - button " Download 3D Model" [ref=e81] [cursor=pointer]:
+                - generic [ref=e82]: 
+                - generic [ref=e83]: Download 3D Model
+              - button "+ Add to" [ref=e84] [cursor=pointer]:
+                - generic [ref=e85]: +
+                - generic [ref=e86]: Add to
+              - button " Embed" [ref=e87] [cursor=pointer]:
+                - generic [ref=e88]: 
+                - generic [ref=e89]: Embed
+              - button " Share" [ref=e90] [cursor=pointer]:
+                - generic [ref=e91]: 
+                - generic [ref=e92]: Share
+              - link " Report" [ref=e93] [cursor=pointer]:
+                - /url: https://safety.epicgames.com/policies/reporting-misconduct/submit-report?product_id=sketchfab_content_report&content_type=sketchfab_model&content_url=https://sketchfab.com/3d-models/semi-truck-9290154411f94d90b274bc5a6592b7ea&content_id=9290154411f94d90b274bc5a6592b7ea
+                - generic [ref=e94]: 
+                - generic [ref=e95]: Report
+          - generic [ref=e96]:
+            - generic [ref=e97]:
+              - generic [ref=e98]:
+                - text: "Triangles:"
+                - generic [ref=e99]: 336.9k
+              - generic [ref=e100]: "Vertices: 168.4k"
+              - generic [ref=e101] [cursor=pointer]: More model information
+            - paragraph [ref=e104]: No description provided.
+            - generic [ref=e105]:
+              - generic [ref=e107]:
+                - text: "License:"
+                - generic [ref=e108]:
+                  - paragraph [ref=e109]:
+                    - text: CC Attribution
+                    - generic: Creative Commons Attribution
+                  - link " Learn more" [ref=e111] [cursor=pointer]:
+                    - /url: http://creativecommons.org/licenses/by/4.0/
+                    - generic [ref=e112]: 
+                    - text: Learn more
+              - generic [ref=e113]:
+                - generic [ref=e114]: 
+                - generic [ref=e115]:
+                  - text: Published
+                  - time [ref=e116]: 4 months ago
+                  - generic: Nov 22nd 2025
+              - generic [ref=e117]:
+                - generic [ref=e118]: 
+                - generic [ref=e119]: No category set.
+              - generic [ref=e120]:
+                - generic [ref=e121]: 
+                - generic [ref=e122]: No tags set.
+          - generic [ref=e125]:
+            - paragraph [ref=e126]: Comments
+            - generic [ref=e129]:
+              - generic [ref=e130]: You must log in to comment.
+              - button "Log in to comment" [ref=e132] [cursor=pointer]
+      - generic [ref=e135]:
+        - generic [ref=e136]: In collections
+        - generic [ref=e138]:
+          - link "Open the collection Weird Vehicles" [ref=e139] [cursor=pointer]:
+            - /url: https://sketchfab.com/CoolGuywhodosevehicles/collections/weird-vehicles-de4217dccd834d699e2be5958dab7f12
+          - generic [ref=e148]:
+            - generic [ref=e149]:
+              - link "Weird Vehicles" [ref=e152] [cursor=pointer]:
+                - /url: https://sketchfab.com/CoolGuywhodosevehicles/collections/weird-vehicles-de4217dccd834d699e2be5958dab7f12
+              - link "Coolguywhodosevehicles/andskibidi" [ref=e155] [cursor=pointer]:
+                - /url: /CoolGuywhodosevehicles
+                - generic "Coolguywhodosevehicles/andskibidi" [ref=e157]
+            - generic [ref=e158]:
+              - generic [ref=e159]:
+                - text: 
+                - generic [ref=e160]: "117"
+                - generic: Models
+              - generic [ref=e161] [cursor=pointer]:
+                - text: 
+                - generic [ref=e162]: "0"
+                - generic: Subscribe
+        - generic [ref=e163]: Suggested 3D Models
+        - generic [ref=e164]:
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - link "Visit semi truck (burnout revenge) 3D model" [ref=e168] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/semi-truck-burnout-revenge-5d27980c3ded4ca5bcd937b87ed6607f
+              - link "Download semi truck (burnout revenge) 3D model" [ref=e174] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/semi-truck-burnout-revenge-5d27980c3ded4ca5bcd937b87ed6607f#download
+                - text: 
+                - generic: Download 3D model
+            - generic [ref=e175]:
+              - generic [ref=e176]:
+                - link "semi truck (burnout revenge)" [ref=e179] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/semi-truck-burnout-revenge-5d27980c3ded4ca5bcd937b87ed6607f
+                - link "amogusstrikesback2" [ref=e182] [cursor=pointer]:
+                  - /url: /amogusstrikesback2
+                  - generic "amogusstrikesback2" [ref=e184]
+              - generic [ref=e185]:
+                - generic [ref=e186]:
+                  - text:  265
+                  - generic: Views
+                - link "Comment semi truck (burnout revenge) 3D model" [ref=e187] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/semi-truck-burnout-revenge-5d27980c3ded4ca5bcd937b87ed6607f#comments
+                  - text:  2
+                  - generic: Comment
+                - generic [ref=e188] [cursor=pointer]:
+                  - text:  18
+                  - generic: Like
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - link "Visit Truck Container Pack Low-poly ASIA 3D model" [ref=e192] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/truck-container-pack-low-poly-asia-000b6d08ad7b4f4198dcab2790008553
+              - link "Download Truck Container Pack Low-poly ASIA 3D model" [ref=e198] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/truck-container-pack-low-poly-asia-000b6d08ad7b4f4198dcab2790008553#download
+                - text: 
+                - generic: Download 3D model
+            - generic [ref=e199]:
+              - generic [ref=e200]:
+                - link "Truck Container Pack Low-poly ASIA" [ref=e203] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/truck-container-pack-low-poly-asia-000b6d08ad7b4f4198dcab2790008553
+                - link "knitro_builds" [ref=e206] [cursor=pointer]:
+                  - /url: /knitro_builds
+                  - generic "knitro_builds" [ref=e208]
+              - generic [ref=e209]:
+                - generic [ref=e210]:
+                  - text:  3k
+                  - generic: Views
+                - link "Comment Truck Container Pack Low-poly ASIA 3D model" [ref=e211] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/truck-container-pack-low-poly-asia-000b6d08ad7b4f4198dcab2790008553#comments
+                  - text:  0
+                  - generic: Comment
+                - generic [ref=e212] [cursor=pointer]:
+                  - text:  68
+                  - generic: Like
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - link "Visit MAN TGX 2010 V8 – High-Detail Semi-Truck 3D model" [ref=e216] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/man-tgx-2010-v8-high-detail-semi-truck-34ce748d9a4b4de7b035cfe5cb97f5d1
+              - link "Download MAN TGX 2010 V8 – High-Detail Semi-Truck 3D model" [ref=e222] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/man-tgx-2010-v8-high-detail-semi-truck-34ce748d9a4b4de7b035cfe5cb97f5d1#download
+                - text: 
+                - generic: Download 3D model
+            - generic [ref=e223]:
+              - generic [ref=e224]:
+                - link "MAN TGX 2010 V8 – High-Detail Semi-Truck" [ref=e227] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/man-tgx-2010-v8-high-detail-semi-truck-34ce748d9a4b4de7b035cfe5cb97f5d1
+                - link "DevPoly3D" [ref=e230] [cursor=pointer]:
+                  - /url: /DevPoly3D
+                  - generic "DevPoly3D" [ref=e232]
+              - generic [ref=e233]:
+                - generic [ref=e234]:
+                  - text:  816
+                  - generic: Views
+                - link "Comment MAN TGX 2010 V8 – High-Detail Semi-Truck 3D model" [ref=e235] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/man-tgx-2010-v8-high-detail-semi-truck-34ce748d9a4b4de7b035cfe5cb97f5d1#comments
+                  - text:  1
+                  - generic: Comment
+                - generic [ref=e236] [cursor=pointer]:
+                  - text:  30
+                  - generic: Like
+          - generic [ref=e238]:
+            - generic [ref=e239]:
+              - link "Visit Battlefield 4 - M977 HEMTT 3D model" [ref=e240] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/battlefield-4-m977-hemtt-a124427dfe894948a1ffa985f26ea5cc
+              - link "Download Battlefield 4 - M977 HEMTT 3D model" [ref=e246] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/battlefield-4-m977-hemtt-a124427dfe894948a1ffa985f26ea5cc#download
+                - text: 
+                - generic: Download 3D model
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - link "Battlefield 4 - M977 HEMTT" [ref=e251] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/battlefield-4-m977-hemtt-a124427dfe894948a1ffa985f26ea5cc
+                - link "thientrung2004pr" [ref=e254] [cursor=pointer]:
+                  - /url: /U.SSCIFI
+                  - generic "thientrung2004pr" [ref=e256]
+              - generic [ref=e257]:
+                - generic [ref=e258]:
+                  - text:  840
+                  - generic: Views
+                - link "Comment Battlefield 4 - M977 HEMTT 3D model" [ref=e259] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/battlefield-4-m977-hemtt-a124427dfe894948a1ffa985f26ea5cc#comments
+                  - text:  0
+                  - generic: Comment
+                - generic [ref=e260] [cursor=pointer]:
+                  - text:  41
+                  - generic: Like
+          - generic [ref=e262]:
+            - generic [ref=e263]:
+              - link "Visit Loomis Head Study with a neck 3D model" [ref=e264] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/loomis-head-study-with-a-neck-3b7c75bc122943959f0d61abac11c413
+              - link "Download Loomis Head Study with a neck 3D model" [ref=e270] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/loomis-head-study-with-a-neck-3b7c75bc122943959f0d61abac11c413#download
+                - text: 
+                - generic: Download 3D model
+            - generic [ref=e271]:
+              - generic [ref=e272]:
+                - link "Loomis Head Study with a neck" [ref=e275] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/loomis-head-study-with-a-neck-3b7c75bc122943959f0d61abac11c413
+                - link "foresterchelle" [ref=e278] [cursor=pointer]:
+                  - /url: /foresterchelle
+                  - generic "foresterchelle" [ref=e280]
+              - generic [ref=e281]:
+                - generic [ref=e282]:
+                  - text:  3.3k
+                  - generic: Views
+                - link "Comment Loomis Head Study with a neck 3D model" [ref=e283] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/loomis-head-study-with-a-neck-3b7c75bc122943959f0d61abac11c413#comments
+                  - text:  0
+                  - generic: Comment
+                - generic [ref=e284] [cursor=pointer]:
+                  - text:  64
+                  - generic: Like
+          - generic [ref=e286]:
+            - generic [ref=e287]:
+              - link "Visit Kamaz-4310 3D model" [ref=e288] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/kamaz-4310-501381652ed74aeba73e1dd123acebb4
+              - link "Download Kamaz-4310 3D model" [ref=e294] [cursor=pointer]:
+                - /url: https://sketchfab.com/3d-models/kamaz-4310-501381652ed74aeba73e1dd123acebb4#download
+                - text: 
+                - generic: Download 3D model
+            - generic [ref=e295]:
+              - generic [ref=e296]:
+                - link "Kamaz-4310" [ref=e299] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/kamaz-4310-501381652ed74aeba73e1dd123acebb4
+                - link "42manako" [ref=e302] [cursor=pointer]:
+                  - /url: /42manako
+                  - generic "42manako" [ref=e304]
+              - generic [ref=e305]:
+                - generic [ref=e306]:
+                  - text:  3.3k
+                  - generic: Views
+                - link "Comment Kamaz-4310 3D model" [ref=e307] [cursor=pointer]:
+                  - /url: https://sketchfab.com/3d-models/kamaz-4310-501381652ed74aeba73e1dd123acebb4#comments
+                  - text:  3
+                  - generic: Comment
+                - generic [ref=e308] [cursor=pointer]:
+                  - text:  89
+                  - generic: Like
+          - button "load more" [ref=e309] [cursor=pointer]:
+            - generic [ref=e310]: load more
+    - generic [ref=e312]:
+      - navigation "footer navigation" [ref=e313]:
+        - generic [ref=e314]:
+          - generic [ref=e315]: enterprise
+          - list [ref=e316]:
+            - listitem [ref=e317]:
+              - link "Enterprise Solutions" [ref=e318] [cursor=pointer]:
+                - /url: /enterprise
+            - listitem [ref=e319]:
+              - link "3D Configurators" [ref=e320] [cursor=pointer]:
+                - /url: /3d-configurators
+            - listitem [ref=e321]:
+              - link "3D eCommerce" [ref=e322] [cursor=pointer]:
+                - /url: /3d-ecommerce
+            - listitem [ref=e323]:
+              - link "3D Viewer" [ref=e324] [cursor=pointer]:
+                - /url: /3d-viewer
+            - listitem [ref=e325]:
+              - link "3D Advertising" [ref=e326] [cursor=pointer]:
+                - /url: /3d-advertising
+            - listitem [ref=e327]:
+              - link "Sketchfab for Teams" [ref=e328] [cursor=pointer]:
+                - /url: /3d-asset-management
+            - listitem [ref=e329]:
+              - link "Customer Stories" [ref=e330] [cursor=pointer]:
+                - /url: https://sketchfab.com/blogs/enterprise
+            - listitem [ref=e331]:
+              - link "Pricing" [ref=e332] [cursor=pointer]:
+                - /url: /plans
+        - generic [ref=e333]:
+          - generic [ref=e334]: ecosystem
+          - list [ref=e335]:
+            - listitem [ref=e336]:
+              - link "Exporters" [ref=e337] [cursor=pointer]:
+                - /url: /exporters
+            - listitem [ref=e338]:
+              - link "Importers" [ref=e339] [cursor=pointer]:
+                - /url: /importers
+            - listitem [ref=e340]:
+              - link "Developers & API" [ref=e341] [cursor=pointer]:
+                - /url: /developers
+            - listitem [ref=e342]:
+              - link "Augmented Reality" [ref=e343] [cursor=pointer]:
+                - /url: /augmented-reality
+            - listitem [ref=e344]:
+              - link "Virtual Reality" [ref=e345] [cursor=pointer]:
+                - /url: /virtual-reality
+        - generic [ref=e346]:
+          - generic [ref=e347]: store
+          - list [ref=e348]:
+            - listitem [ref=e349]:
+              - link "Buy 3D models" [ref=e350] [cursor=pointer]:
+                - /url: https://www.fab.com/category/3d-model
+            - listitem [ref=e351]:
+              - link "Become a Seller on Fab" [ref=e352] [cursor=pointer]:
+                - /url: https://www.fab.com/become-a-publisher
+            - listitem [ref=e353]:
+              - link "Free 3D Models" [ref=e354] [cursor=pointer]:
+                - /url: /features/free-3d-models
+        - generic [ref=e355]:
+          - generic [ref=e356]: community
+          - list [ref=e357]:
+            - listitem [ref=e358]:
+              - link "Explore" [ref=e359] [cursor=pointer]:
+                - /url: /3d-models/popular
+            - listitem [ref=e360]:
+              - link "Help Center" [ref=e361] [cursor=pointer]:
+                - /url: https://support.fab.com/s/?ProductOrigin=Sketchfab
+            - listitem [ref=e362]:
+              - link "Education" [ref=e363] [cursor=pointer]:
+                - /url: /education
+            - listitem [ref=e364]:
+              - link "Museums" [ref=e365] [cursor=pointer]:
+                - /url: /museums
+            - listitem [ref=e366]:
+              - link "Blog" [ref=e367] [cursor=pointer]:
+                - /url: https://sketchfab.com/blogs/community
+            - listitem [ref=e368]:
+              - link "Sketchfab Masters" [ref=e369] [cursor=pointer]:
+                - /url: /masters
+        - generic [ref=e370]:
+          - generic [ref=e371]: about
+          - list [ref=e372]:
+            - listitem [ref=e373]:
+              - link "Company" [ref=e374] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e375]:
+              - link "Careers" [ref=e376] [cursor=pointer]:
+                - /url: https://www.epicgames.com/site/en-US/careers
+            - listitem [ref=e377]:
+              - link "Press Kit" [ref=e378] [cursor=pointer]:
+                - /url: /press
+            - listitem [ref=e379]:
+              - link "Features" [ref=e380] [cursor=pointer]:
+                - /url: /features
+            - listitem [ref=e381]:
+              - link "Contact us" [ref=e382] [cursor=pointer]:
+                - /url: /about#contact
+      - generic [ref=e383]:
+        - generic [ref=e384]:
+          - img [ref=e385]
+          - generic [ref=e390]: © 2026, Sketchfab, Inc. All rights reserved.
+        - generic [ref=e391]:
+          - link "Terms of use" [ref=e392] [cursor=pointer]:
+            - /url: /terms
+          - link "Privacy policy" [ref=e393] [cursor=pointer]:
+            - /url: /privacy
+          - link "Sitemap" [ref=e394] [cursor=pointer]:
+            - /url: /sitemap
+        - generic [ref=e395]:
+          - link "Follow us on Twitter" [ref=e396] [cursor=pointer]:
+            - /url: https://twitter.com/Sketchfab
+            - img [ref=e397]
+          - link "Follow us on Instagram" [ref=e401] [cursor=pointer]:
+            - /url: https://www.instagram.com/sketchfab
+            - img [ref=e402]
+          - link "Follow us on Facebook" [ref=e406] [cursor=pointer]:
+            - /url: https://www.facebook.com/Sketchfab
+            - img [ref=e407]
+          - link "Join us on Discord" [ref=e411] [cursor=pointer]:
+            - /url: https://discord.gg/VzNxX6D
+            - img [ref=e412]
+          - link "Follow us on Pinterest" [ref=e416] [cursor=pointer]:
+            - /url: https://www.pinterest.com/sketchfab
+            - img [ref=e417]
+          - link "Follow us on Linkedin" [ref=e421] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/sketchfab
+            - img [ref=e422]

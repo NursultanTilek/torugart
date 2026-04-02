@@ -1,0 +1,9 @@
+[     237ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-LGRTSC5P.js?v=b4878e05:302
+[     340ms] [WARNING] THREE.WebGLShadowMap: PCFSoftShadowMap has been deprecated. Using PCFShadowMap instead. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-LGRTSC5P.js?v=b4878e05:302
+[     416ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=b4878e05:19778
+[    7755ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-LGRTSC5P.js?v=b4878e05:302
+[    7812ms] [WARNING] THREE.WebGLShadowMap: PCFSoftShadowMap has been deprecated. Using PCFShadowMap instead. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-LGRTSC5P.js?v=b4878e05:302
+[    7892ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=b4878e05:19778
+[  169844ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-LGRTSC5P.js?v=b4878e05:302
+[  169896ms] [WARNING] THREE.WebGLShadowMap: PCFSoftShadowMap has been deprecated. Using PCFShadowMap instead. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-LGRTSC5P.js?v=b4878e05:302
+[  169954ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=b4878e05:19778

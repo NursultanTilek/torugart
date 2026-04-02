@@ -1,0 +1,20 @@
+[    1947ms] [ERROR] RuntimeError: NG0907: The _AppComponent component is not marked as standalone, but Angular expects to have a standalone component here. Please make sure the _AppComponent component has the `standalone: true` flag in the decorator.
+    at assertStandaloneComponentType (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=9527dd55:8461:11)
+    at internalCreateApplication (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=9527dd55:22995:7)
+    at bootstrapApplication (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/@angular_platform-browser.js?v=9527dd55:8137:10)
+    at http://localhost:4200/main.js:1108:1 @ http://localhost:4200/main.js:1107
+[   15546ms] [ERROR] WebSocket connection to 'ws://localhost:4200/?token=1mMIoaYfXIEc' failed:  @ http://localhost:4200/@vite/client:529
+[   16552ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/:0
+[   17554ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/:0
+[   18555ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/:0
+[   19557ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/:0
+[   20692ms] [ERROR] RuntimeError: NG0907: The _AppComponent component is not marked as standalone, but Angular expects to have a standalone component here. Please make sure the _AppComponent component has the `standalone: true` flag in the decorator.
+    at assertStandaloneComponentType (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=9527dd55:8461:11)
+    at internalCreateApplication (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=9527dd55:22995:7)
+    at bootstrapApplication (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/@angular_platform-browser.js?v=9527dd55:8137:10)
+    at http://localhost:4200/main.js:1108:1 @ http://localhost:4200/main.js:1107
+[   28612ms] [ERROR] RuntimeError: NG0907: The _AppComponent component is not marked as standalone, but Angular expects to have a standalone component here. Please make sure the _AppComponent component has the `standalone: true` flag in the decorator.
+    at assertStandaloneComponentType (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=9527dd55:8461:11)
+    at internalCreateApplication (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/chunk-7HP6PHLZ.js?v=9527dd55:22995:7)
+    at bootstrapApplication (http://localhost:4200/@fs/home/ubuntu/Desktop/torugart-3d/.angular/cache/17.3.17/vite/deps/@angular_platform-browser.js?v=9527dd55:8137:10)
+    at http://localhost:4200/main.js:1108:1 @ http://localhost:4200/main.js:1107
