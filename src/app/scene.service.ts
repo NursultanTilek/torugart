@@ -271,7 +271,7 @@ export class SceneService {
       this.registerLabel(wall, tip);
       const rm = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.2, sy * 0.11, sz + 0.2), new THREE.MeshStandardMaterial({ color: roofC(col) }));
       rm.position.set(x, sy + sy * 0.055 - 0.02, z); rm.castShadow = true; this.scene.add(rm);
-      this.registerLabel(rm, tip); this.addSprite(lbl, x, z, sy + 1.0, 2.4, 0.65);
+      this.registerLabel(rm, tip); this.addSprite(lbl, x, z, sy + 2.2, 2.4, 0.65);
     };
     // Погран. контроль — normal building on the side of road
     b(20, -4, 3.0, 2.5, 2.0, 0xd8dcc8, 'Погран.контроль', 'Пограничный контроль\nФиксация АТС\nВремя: 1 мин');
@@ -285,12 +285,12 @@ export class SceneService {
     this.M(new THREE.BoxGeometry(0.08, 0.06, 3.0), new THREE.MeshStandardMaterial({ color: 0xffff88 }), 5, 0.03, -10);
     // Roof
     this.M(new THREE.BoxGeometry(7.5, 0.25, 4.0), new THREE.MeshStandardMaterial({ color: 0xd0ccc0, roughness: 0.8 }), 5, 3.15, -10, true);
-    this.addSprite('Весы (ВГК)', 5, -10, 4.0, 3.0, 0.8);
+    this.addSprite('Весы (ВГК)', 5, -10, 5.5, 3.0, 0.8);
     // ГКО — exit of Zone 8
     // ГКО — in the gap between lane 3 (z=-16) and lane 4 (z=-26)
     b(SLOT_XS[0] - 3, -21, 3.0, 2.8, 4.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
     // Зона регистрации label
-    this.addSprite('Зона регистрации', -28, -5, 2.5, 3.5, 0.65);
+    this.addSprite('Зона регистрации', -28, -5, 5.0, 3.5, 0.65);
   }
 
   private buildZone8Lanes() {
@@ -459,12 +459,22 @@ export class SceneService {
   private addSprite(text: string, x: number, z: number, y: number, w: number, h: number) {
     const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
     const ctx = c.getContext('2d')!;
-    ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.beginPath();
-    ctx.roundRect(12, 12, 1000, 232, 20); ctx.fill();
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 56px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    text.split('\n').forEach((l, i) => ctx.fillText(l, 512, 96 + i * 72));
-    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
-    s.position.set(x, y, z); s.scale.set(w * 1.4, h * 1.4, 1); this.scene.add(s);
+    // Bold dark background pill
+    ctx.fillStyle = 'rgba(8,12,24,0.88)';
+    ctx.beginPath(); ctx.roundRect(8, 8, 1008, 240, 24); ctx.fill();
+    // Subtle border
+    ctx.strokeStyle = 'rgba(136,170,238,0.5)'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(8, 8, 1008, 240, 24); ctx.stroke();
+    // Text — white, large, sharp
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 96px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const lines = text.split('\n');
+    const lineH = 104;
+    const startY = 128 - ((lines.length - 1) * lineH) / 2;
+    lines.forEach((l, i) => ctx.fillText(l, 512, startY + i * lineH));
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true, sizeAttenuation: true }));
+    s.position.set(x, y, z); s.scale.set(w * 3.5, h * 3.5, 1); this.scene.add(s);
   }
 
 
