@@ -3,25 +3,23 @@
 
   <!-- Viewport overlay controls -->
   <div class="overlay-controls">
-    <!-- View presets -->
+    <!-- View presets d-pad -->
     <div class="ctrl-group view-pad">
-      <div class="view-label">ВИГЛЯД</div>
       <div class="vpad-top">
-        <button class="vpad-btn" (click)="setView('top')" title="Вид сверху">TOP</button>
+        <button class="vpad-btn" (click)="setView('top')" title="Вид сверху">↑</button>
       </div>
       <div class="vpad-middle">
-        <button class="vpad-btn" (click)="setView('left')" title="Вид слева">L</button>
+        <button class="vpad-btn" (click)="setView('left')" title="Вид слева">←</button>
         <button class="vpad-btn vpad-reset" (click)="resetView()" title="Сброс камеры">⊙</button>
-        <button class="vpad-btn" (click)="setView('right')" title="Вид справа">R</button>
+        <button class="vpad-btn" (click)="setView('right')" title="Вид справа">→</button>
       </div>
       <div class="vpad-bottom">
-        <button class="vpad-btn" (click)="setView('front')" title="Вид спереди">BTM</button>
+        <button class="vpad-btn" (click)="setView('front')" title="Вид снизу">↓</button>
       </div>
     </div>
 
-    <!-- Zoom controls -->
+    <!-- Zoom -->
     <div class="ctrl-group zoom-group">
-      <div class="view-label">МАСШТАБ</div>
       <button class="zoom-btn" (click)="zoom(0.8)" title="Приблизить">+</button>
       <div class="zoom-divider"></div>
       <button class="zoom-btn" (click)="zoom(1.25)" title="Отдалить">−</button>
