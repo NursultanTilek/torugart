@@ -452,7 +452,7 @@ export class SceneService {
   }
 
   private async loadTruckTemplate(): Promise<void> {
-    const cargo = await this.loadGLB('assets/models/truck.glb', 0.7);
+    const cargo = await this.loadGLB('assets/models/truck.glb', 0.25);
     if (cargo) { this.glbRotY = 0; }
     this.truckTemplate = cargo ?? this.buildProceduralTruck(0xcc3322);
     this.templateReady = true;
