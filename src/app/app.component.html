@@ -1,7 +1,39 @@
 <div class="container">
   <canvas #canvas class="viewport"></canvas>
 
-  <div class="panel">
+  <!-- Viewport overlay controls -->
+  <div class="overlay-controls">
+    <!-- View presets -->
+    <div class="ctrl-group view-pad">
+      <div class="view-label">ВИГЛЯД</div>
+      <div class="vpad-top">
+        <button class="vpad-btn" (click)="setView('top')" title="Вид сверху">TOP</button>
+      </div>
+      <div class="vpad-middle">
+        <button class="vpad-btn" (click)="setView('left')" title="Вид слева">L</button>
+        <button class="vpad-btn vpad-reset" (click)="resetView()" title="Сброс камеры">⊙</button>
+        <button class="vpad-btn" (click)="setView('right')" title="Вид справа">R</button>
+      </div>
+      <div class="vpad-bottom">
+        <button class="vpad-btn" (click)="setView('front')" title="Вид спереди">BTM</button>
+      </div>
+    </div>
+
+    <!-- Zoom controls -->
+    <div class="ctrl-group zoom-group">
+      <div class="view-label">МАСШТАБ</div>
+      <button class="zoom-btn" (click)="zoom(0.8)" title="Приблизить">+</button>
+      <div class="zoom-divider"></div>
+      <button class="zoom-btn" (click)="zoom(1.25)" title="Отдалить">−</button>
+    </div>
+  </div>
+
+  <!-- Sidebar toggle tab -->
+  <button class="sidebar-tab" [class.tab-closed]="!sidebarOpen" (click)="sidebarOpen = !sidebarOpen" [title]="sidebarOpen ? 'Скрыть панель' : 'Показать панель'">
+    <span class="tab-chevron" [class.flipped]="!sidebarOpen">›</span>
+  </button>
+
+  <div class="panel" [class.panel-hidden]="!sidebarOpen">
     <div class="panel-title">ТОРУГАРТ ТАМОЖНЯ</div>
 
     <div class="section-title">Время симуляции</div>
@@ -105,6 +137,6 @@
       {{ sim.isPaused() ? '▶ Продолжить' : '⏸ Пауза' }}
     </button>
 
-    <div class="hint">Мышь: тащи для панорамы · Колесо: масштаб · Наведи на объект для подробностей</div>
+    <div class="hint">Мышь: тащи для панорамы · Колесо: масштаб</div>
   </div>
 </div>

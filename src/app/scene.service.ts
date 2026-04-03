@@ -49,6 +49,29 @@ export class SceneService {
   private roadMat!: THREE.MeshStandardMaterial; private roadScroll = 0;
   private focus = new THREE.Vector3(-10, 0, -10);
   private dist = 65; private pitch = 45; private yaw = 0;
+
+  zoom(factor: number) {
+    this.dist = THREE.MathUtils.clamp(this.dist * factor, 5, 180);
+    this.applyCamera();
+  }
+
+  setView(preset: 'top' | 'front' | 'left' | 'right') {
+    const views: Record<string, { yaw: number; pitch: number; dist: number }> = {
+      top:   { yaw: 0,   pitch: 85, dist: 80 },
+      front: { yaw: 180, pitch: 20, dist: 75 },
+      left:  { yaw: 90,  pitch: 30, dist: 75 },
+      right: { yaw: -90, pitch: 30, dist: 75 },
+    };
+    const v = views[preset];
+    this.yaw = v.yaw; this.pitch = v.pitch; this.dist = v.dist;
+    this.applyCamera();
+  }
+
+  resetView() {
+    this.focus.set(-10, 0, -10);
+    this.dist = 65; this.pitch = 45; this.yaw = 0;
+    this.applyCamera();
+  }
   private dragging = false; private lastXY = { x: 0, y: 0 };
   private raycaster = new THREE.Raycaster();
   private mouse = new THREE.Vector2();
