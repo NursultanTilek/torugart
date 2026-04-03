@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#0a0c10"/>
+  <!-- Trailer -->
+  <rect x="2" y="10" width="18" height="11" rx="1.5" fill="#4688cc"/>
+  <!-- Cab -->
+  <rect x="20" y="13" width="10" height="8" rx="1.5" fill="#5599dd"/>
+  <!-- Cab roof -->
+  <rect x="21" y="10" width="9" height="4" rx="1.5" fill="#5599dd"/>
+  <!-- Windshield -->
+  <rect x="22" y="11" width="7" height="3" rx="1" fill="#aaccff" opacity="0.85"/>
+  <!-- Chassis -->
+  <rect x="2" y="21" width="28" height="2" rx="0.5" fill="#2a3a5a"/>
+  <!-- Wheels -->
+  <circle cx="7" cy="23" r="3" fill="#1a1f2e"/>
+  <circle cx="7" cy="23" r="1.8" fill="#3a4560"/>
+  <circle cx="16" cy="23" r="3" fill="#1a1f2e"/>
+  <circle cx="16" cy="23" r="1.8" fill="#3a4560"/>
+  <circle cx="26" cy="23" r="3" fill="#1a1f2e"/>
+  <circle cx="26" cy="23" r="1.8" fill="#3a4560"/>
+</svg>
