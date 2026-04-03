@@ -290,7 +290,7 @@ export class SceneService {
     // ГКО — in the gap between lane 3 (z=-16) and lane 4 (z=-26)
     b(SLOT_XS[0] - 3, -21, 3.0, 2.8, 4.0, 0xe2d8c8, 'ГКО', 'ГКО\nГос. контроль отправлений');
     // Зона регистрации label
-    this.addSprite('Зона регистрации', -28, -5, 5.0, 3.5, 0.65);
+    this.addSprite('Зона регистрации', -28, -21, 5.0, 3.5, 0.65);
   }
 
   private buildZone8Lanes() {
