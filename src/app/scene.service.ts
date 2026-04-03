@@ -6,7 +6,7 @@ import { SimulationService } from './simulation.service';
 // Zone 8: 6 horizontal lanes, trucks sit at registration booths on the LEFT side
 const LANE_ZS = [-8, -12, -16, -26, -30, -34]; // z positions: lanes 1-3 (4 apart), gap for GKO, lanes 4-6
 // 4 slot positions per lane: 1 at booth (processing) + 3 waiting in line — far left in X
-const SLOT_XS = [-36, -30, -24, -18];
+const SLOT_XS = [-36, -33, -27, -21];
 const MAX_LANE = 4;
 // Main road: east→west along z=0
 const MAIN_ROAD: [number, number][] = [[35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0], [-40, 0], [-50, 0], [-55, 0]];
@@ -543,7 +543,8 @@ export class SceneService {
             const slots = zone.slotsByLane[Math.min(li, zone.slotsByLane.length - 1)];
             for (let i = 0; i < lane.trucks.length; i++) {
               const s = slots[Math.min(i, slots.length - 1)];
-              this.moveTo(lane.trucks[i], new THREE.Vector3(s.x, 0.15, LANE_ZS[li]));
+              const tx = i === 0 ? s.x - 3 : s.x;
+              this.moveTo(lane.trucks[i], new THREE.Vector3(tx, 0.15, LANE_ZS[li]));
             }
             if (lane.trucks.length) { lane.remaining[0] = this.rand(zone.minT, zone.maxT) + this.sim.laneDelays()[li]; }
           } else {
@@ -612,9 +613,11 @@ export class SceneService {
     if (zone.id === 8) {
       const laneZ = LANE_ZS[li];
       // Route: go south to lane Z at entry x, then west to slot
+      // At processing position (slot 0), offset truck further under the booth canopy
+      const targetX = si === 0 ? pos.x - 3 : pos.x;
       this.followPath(t, [
         new THREE.Vector3(-16, 0.15, laneZ),
-        new THREE.Vector3(pos.x, 0.15, laneZ),
+        new THREE.Vector3(targetX, 0.15, laneZ),
       ], () => {});
     } else if (zone.id === 2) {
       // VGK: move to bay x at entry z=-7, then straight south through building to slot
