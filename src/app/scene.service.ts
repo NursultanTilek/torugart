@@ -11,7 +11,12 @@ const MAX_LANE = 4;
 // Main road: east→west along z=0
 const MAIN_ROAD: [number, number][] = [[35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0], [-40, 0], [-50, 0], [-55, 0]];
 const BRANCH_ROAD: [number, number][] = [[5, 0], [5, -3], [5, -6], [5, -9]];
-const TRUCK_COLORS = [0xc0392b, 0x2980b9, 0x27ae60, 0xe67e22, 0x8e44ad, 0x16a085, 0xd35400, 0x2c3e50];
+const TRUCK_COLORS = [
+  0xc0392b, 0x2980b9, 0x27ae60, 0xe67e22, 0x8e44ad, 0x16a085, 0xd35400, 0x2c3e50,
+  0xf1c40f, 0xe74c3c, 0x1abc9c, 0x3498db, 0x9b59b6, 0xe67e22, 0x2ecc71, 0xf39c12,
+  0x1a5276, 0x6c3483, 0x0e6655, 0x784212, 0x1b2631, 0x922b21, 0x1a7a4a, 0xd4ac0d,
+  0x5d6d7e, 0xff6b6b, 0x48dbfb, 0xff9f43, 0x1dd1a1, 0xa29bfe,
+];
 
 interface TruckObj {
   id: number; root: THREE.Group; wheels: THREE.Object3D[];
@@ -453,7 +458,7 @@ export class SceneService {
 
   private async loadTruckTemplate(): Promise<void> {
     const cargo = await this.loadGLB('assets/models/truck.glb', 0.4);
-    if (cargo) { this.glbRotY = 0; }
+    if (cargo) { this.glbRotY = 0; cargo.children[0].position.y = 0.92; }
     this.truckTemplate = cargo ?? this.buildProceduralTruck(0xcc3322);
     this.templateReady = true;
   }
