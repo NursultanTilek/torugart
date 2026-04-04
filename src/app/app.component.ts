@@ -42,6 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   sidebarOpen = true;
+  controlsOpen = true;
   zoom(factor: number) { this.scene.zoom(factor); }
   setView(preset: 'top' | 'front' | 'left' | 'right') { this.scene.setView(preset); }
   resetView() { this.scene.resetView(); }

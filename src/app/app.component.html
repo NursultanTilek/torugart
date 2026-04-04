@@ -1,8 +1,11 @@
 <div class="container">
   <canvas #canvas class="viewport"></canvas>
 
+  <!-- Controls visibility toggle -->
+  <button class="ctrl-toggle" (click)="controlsOpen = !controlsOpen" [title]="controlsOpen ? 'Скрыть управление' : 'Показать управление'">{{ controlsOpen ? '✕' : '⊞' }}</button>
+
   <!-- Viewport overlay controls -->
-  <div class="overlay-controls">
+  <div class="overlay-controls" [class.controls-hidden]="!controlsOpen">
     <!-- View presets d-pad -->
     <div class="ctrl-group view-pad">
       <div class="vpad-top">
