@@ -9,8 +9,8 @@ const LANE_ZS = [-8, -12, -16, -26, -30, -34]; // z positions: lanes 1-3 (4 apar
 const SLOT_XS = [-36, -33, -27, -21];
 const MAX_LANE = 4;
 // Zone 9: Накопитель — 10 lanes × 10 slots = 100 capacity, north of main road (positive Z)
-const NAK_LANE_ZS = [7, 10, 13, 16, 19, 22, 25, 28, 31, 34];
-const NAK_SLOT_XS = [-11, -15.5, -20, -24.5, -29, -33.5, -38, -42.5, -47, -51.5];
+const NAK_LANE_ZS = [-43, -48, -53, -58, -63, -68, -73, -78, -83, -88]; // 5-unit lane spacing, north side
+const NAK_SLOT_XS = [-74, -67, -60, -53, -46, -39, -32, -25, -18, -11]; // 7-unit slot spacing, far-end first
 const NAK_MAX_PER_LANE = 10;
 // Main road: east→west along z=0 — extended east to X=65
 const MAIN_ROAD: [number, number][] = [[65, 0], [60, 0], [55, 0], [50, 0], [45, 0], [40, 0], [35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0], [-40, 0], [-50, 0], [-55, 0]];
@@ -216,7 +216,7 @@ export class SceneService {
   }
 
   private buildGround() {
-    this.M(new THREE.PlaneGeometry(320, 260), new THREE.MeshStandardMaterial({ color: 0xb0a080, roughness: 0.97 }), 0, 0, -10, false, -Math.PI / 2);
+    this.M(new THREE.PlaneGeometry(420, 360), new THREE.MeshStandardMaterial({ color: 0xb0a080, roughness: 0.97 }), 0, 0, -30, false, -Math.PI / 2);
   }
 
   private buildMountains() {
@@ -229,12 +229,15 @@ export class SceneService {
       m(c, 0.94, r, h, h / 2); m(new THREE.Color(c).multiplyScalar(0.72).getHex(), 0.96, r * 0.65, h * 0.45, h * 0.52);
       m(0xe8eef8, 0.88, r * 0.35, h * 0.28, h * 0.86); g.position.set(x, 0, z); this.scene.add(g);
     };
-    mk(-55, -85, 62, 34, 0x7a7870); mk(-25, -95, 70, 42, 0x6e6c68);
-    mk(12, -105, 78, 48, 0x686664); mk(52, -90, 62, 38, 0x72706c);
+    // North mountains pushed back to Z<=-115 so they appear behind накопитель (Z=-40..-92)
+    mk(-55, -120, 62, 34, 0x7a7870); mk(-25, -130, 70, 42, 0x6e6c68);
+    mk(12, -140, 78, 48, 0x686664); mk(52, -125, 62, 38, 0x72706c);
     mk(85, -65, 50, 30, 0x787470); mk(-95, -55, 55, 32, 0x706e6c);
-    mk(-105, -22, 44, 27, 0x747270); mk(95, -22, 42, 24, 0x787672);
-    mk(-72, 25, 40, 24, 0x6e6c68); mk(72, 28, 45, 28, 0x706e6a);
-    mk(30, -125, 88, 55, 0x646260); mk(-48, -115, 82, 50, 0x626060);
+    mk(-115, -22, 44, 27, 0x747270); mk(105, -22, 42, 24, 0x787672);
+    mk(-80, 30, 40, 24, 0x6e6c68); mk(80, 32, 45, 28, 0x706e6a);
+    mk(30, -155, 88, 55, 0x646260); mk(-48, -145, 82, 50, 0x626060);
+    // Extra mountains for wider scene
+    mk(-90, -130, 58, 36, 0x726e6a); mk(75, -140, 65, 40, 0x6c6a66);
   }
 
   private buildRoad() {
@@ -269,6 +272,10 @@ export class SceneService {
     this.M(new THREE.BoxGeometry(6, 0.04, 32), this.roadMat, -44, 0.02, -21);
     // Exit road: north from lanes to main road
     this.M(new THREE.BoxGeometry(3.6, 0.04, 10), this.roadMat, -45, 0.02, -2);
+    // North corridor: from Z=-13 to накопитель south gate at Z=-40
+    this.M(new THREE.BoxGeometry(4, 0.04, 30), this.roadMat, -13, 0.02, -26.5);
+    // East-side corridor for накопитель exit routing (X=-9, Z=-13 to -43)
+    this.M(new THREE.BoxGeometry(3.6, 0.04, 32), this.roadMat, -9, 0.02, -28);
   }
 
   private buildBuildings() {
@@ -500,12 +507,12 @@ export class SceneService {
   private async loadTruckTemplates(): Promise<void> {
     const [cargo, large] = await Promise.all([
       this.loadGLB('assets/models/truck.glb', 0.4),
-      this.loadGLB('assets/models/large_truck.glb', 0.5, -Math.PI / 2),
+      this.loadGLB('assets/models/large_truck.glb', 0.7, Math.PI / 2),
     ]);
     if (cargo) { this.glbRotY = 0; cargo.children[0].position.y = 0.92; }
     this.truckTemplate = cargo ?? this.buildProceduralTruck(0xcc3322);
     this.templateReady = true;
-    if (large) { large.children[0].position.y = 0.87; }
+    if (large) { large.children[0].position.y = 1.2; }
     this.largeTruckTemplate = large ?? this.buildProceduralLargeTruck(0x2244aa);
   }
 
@@ -601,10 +608,10 @@ export class SceneService {
       z8Slots.map(lane => lane.map(v => [v.x, v.z] as [number, number])),
       [[5, -13], [0, -13], [-5, -13], [-10, -13], [-15, -13]], false, MAX_LANE);
     this.zones.push(z8); this.zone8 = z8;
-    // Zone 9: Накопитель — 10 lanes north of main road, large vehicles only
-    const z9 = make(9, 60, 120, -13, 4,
+    // Zone 9: Накопитель — 10 lanes × 10 slots, north side (negative Z)
+    const z9 = make(9, 60, 120, -13, -40,
       NAK_LANE_ZS.map(lz => NAK_SLOT_XS.map(sx => [sx, lz] as [number, number])),
-      [[-13, 0], [-13, 2], [-13, 4]], false, NAK_MAX_PER_LANE);
+      [[5, -10], [5, -13], [0, -13], [-5, -13], [-10, -13], [-13, -13]], false, NAK_MAX_PER_LANE);
     this.zones.push(z9); this.zone9 = z9;
   }
 
@@ -686,7 +693,8 @@ export class SceneService {
       if (zone.id === 9) {
         if (!this.z9Queue.includes(t)) this.z9Queue.push(t);
         const qi = this.z9Queue.indexOf(t);
-        this.moveTo(t, new THREE.Vector3(-13, 0.15, 2 + (qi + 1) * 3));
+        // Queue south of накопитель entry gate, 4 units apart
+        this.moveTo(t, new THREE.Vector3(-13, 0.15, -40 + (qi + 1) * 4));
       }
       return;
     }
@@ -730,20 +738,23 @@ export class SceneService {
     if (t.isLarge) {
       const laneIdx = Math.max(0, Math.min(t.laneAssigned >= 0 ? t.laneAssigned : 0, NAK_LANE_ZS.length - 1));
       const lz = NAK_LANE_ZS[laneIdx];
+      // Drive east to exit gate, then south to Z=-13 corridor
       this.followPath(t, [
         new THREE.Vector3(-10, 0.15, lz),
         new THREE.Vector3(-8, 0.15, lz),
-        new THREE.Vector3(-8, 0.15, 4),
-        new THREE.Vector3(-8, 0.15, 0),
+        new THREE.Vector3(-8, 0.15, -13),
       ], () => {
         this.startEnpBlink(t);
-        const ms = (this.rand(60, 120) / this.sim.simSpeed()) * 1000;
+        const ms = (this.rand(30, 60) / this.sim.simSpeed()) * 1000;
         setTimeout(() => {
           this.stopEnpBlink(t);
           this.sim.nakopitelExited();
           this.sim.truckExited(true);
+          // Join same exit road as regular trucks
           this.followPath(t, [
-            new THREE.Vector3(-20, 0.15, 0),
+            new THREE.Vector3(-45, 0.15, -13),
+            new THREE.Vector3(-45, 0.15, -2),
+            new THREE.Vector3(-45, 0.15, 0),
             new THREE.Vector3(-55, 0.15, 0),
           ], () => { this.truckGroup.remove(t.root); this.trucks = this.trucks.filter(x => x !== t); });
         }, ms);
@@ -819,43 +830,44 @@ export class SceneService {
     const postM = new THREE.MeshStandardMaterial({ color: 0xb8b0a0, roughness: 0.9 });
     const railM = new THREE.MeshStandardMaterial({ color: 0xa8a098, roughness: 0.85 });
     const gateBarM = new THREE.MeshStandardMaterial({ color: 0xdd2222 });
-    // Fence bounds: X=-10..-52, Z=6..36
-    const X0 = -10, X1 = -52, Z0 = 6, Z1 = 36;
-    // South fence (Z=Z0), gap at X=-11..-17 (entry gate)
+    // Fence bounds: X=-10..-80, Z=-40..-92 (north of main road)
+    const X0 = -10, X1 = -80, Z0 = -40, Z1 = -92;
+    const cx = (X0 + X1) / 2, cz = (Z0 + Z1) / 2;
+
+    // South fence (Z=Z0), entry gap at X=-11..-17
     for (let x = X0; x >= X1; x -= 2.5) {
       if (x > -11 || x < -17) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, x, 0.8, Z0, true);
     }
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - (-17))), railM, (X1 + (-17)) / 2, 1.4, Z0);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - (-17))), railM, (X1 + (-17)) / 2, 0.75, Z0);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X0 - (-11))), railM, (X0 + (-11)) / 2, 1.4, Z0);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X0 - (-11))), railM, (X0 + (-11)) / 2, 0.75, Z0);
-    // Entry gate bar (south face, over entry gap)
+    this.M(new THREE.BoxGeometry(1, 0.1, 0.1), railM, -10.5, 1.4, Z0);
+    this.M(new THREE.BoxGeometry(1, 0.1, 0.1), railM, -10.5, 0.75, Z0);
+    this.M(new THREE.BoxGeometry(63, 0.1, 0.1), railM, (-17 + X1) / 2, 1.4, Z0);
+    this.M(new THREE.BoxGeometry(63, 0.1, 0.1), railM, (-17 + X1) / 2, 0.75, Z0);
     this.M(new THREE.BoxGeometry(6, 0.18, 0.18), gateBarM, -14, 2.2, Z0, true);
+
     // North fence (Z=Z1)
     for (let x = X0; x >= X1; x -= 2.5) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, x, 0.8, Z1, true);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - X0)), railM, (X0 + X1) / 2, 1.4, Z1);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - X0)), railM, (X0 + X1) / 2, 0.75, Z1);
+    this.M(new THREE.BoxGeometry(70, 0.1, 0.1), railM, cx, 1.4, Z1);
+    this.M(new THREE.BoxGeometry(70, 0.1, 0.1), railM, cx, 0.75, Z1);
+
     // West fence (X=X1)
-    for (let z = Z0; z <= Z1; z += 2.5) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, X1, 0.8, z, true);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Z1 - Z0), railM, X1, 1.4, (Z0 + Z1) / 2, false, 0, Math.PI / 2);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Z1 - Z0), railM, X1, 0.75, (Z0 + Z1) / 2, false, 0, Math.PI / 2);
-    // East fence (X=X0), gap at Z=7..11 (exit gate)
-    for (let z = Z0; z <= Z1; z += 2.5) {
-      if (z < 7 || z > 11) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, X0, 0.8, z, true);
+    for (let z = Z0; z >= Z1; z -= 2.5) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, X1, 0.8, z, true);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, 52), railM, X1, 1.4, cz);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, 52), railM, X1, 0.75, cz);
+
+    // East fence (X=X0), exit gap at Z=-43..-48
+    for (let z = Z0; z >= Z1; z -= 2.5) {
+      if (z < -43 || z > -48) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, X0, 0.8, z, true);
     }
-    this.M(new THREE.BoxGeometry(0.1, 0.1, Z0 - Z0 + 1), railM, X0, 1.4, Z0);
-    const eastFenceLen1 = Math.abs(Z1 - 11);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, eastFenceLen1), railM, X0, 1.4, (Z1 + 11) / 2, false, 0, Math.PI / 2);
-    this.M(new THREE.BoxGeometry(0.1, 0.1, eastFenceLen1), railM, X0, 0.75, (Z1 + 11) / 2, false, 0, Math.PI / 2);
-    // Exit gate bar (east face, over exit gap)
-    this.M(new THREE.BoxGeometry(0.18, 0.18, 4), gateBarM, X0, 2.2, 9, true);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, 3), railM, X0, 1.4, -41.5);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, 3), railM, X0, 0.75, -41.5);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, 44), railM, X0, 1.4, (-48 + Z1) / 2);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, 44), railM, X0, 0.75, (-48 + Z1) / 2);
+    this.M(new THREE.BoxGeometry(0.18, 0.18, 5), gateBarM, X0, 2.2, -45.5, true);
+
     // Road surface inside накопитель
-    this.M(new THREE.BoxGeometry(42, 0.04, 30), this.roadMat, -31, 0.02, 21);
-    // Entry road (Z=0 to Z=6 at X=-13)
-    this.M(new THREE.BoxGeometry(4, 0.04, 6), this.roadMat, -13, 0.02, 3);
-    // Exit road stub (X=-10 to X=-5 at Z=9)
-    this.M(new THREE.BoxGeometry(5, 0.04, 4), this.roadMat, -7.5, 0.02, 9);
-    this.addSprite('Накопитель', -31, 21, 5.0, 4.5, 0.9);
+    this.M(new THREE.BoxGeometry(70, 0.04, 52), this.roadMat, cx, 0.02, cz);
+
+    this.addSprite('Накопитель', cx, cz, 5.5, 5.0, 1.0);
   }
 
   private buildZone9Lanes() {
