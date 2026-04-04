@@ -54,6 +54,20 @@
       }
     </div>
 
+    <div class="section-title">Накопитель</div>
+    <div class="stat-row">
+      <span>Крупные АТС</span>
+      <span class="val" [style.color]="sim.nakopitelCount() > 90 ? '#ff3333' : '#eef2ff'">
+        {{ sim.nakopitelCount() }} / {{ sim.nakopitelCapacity }}
+      </span>
+    </div>
+    <div class="nak-bar-wrap">
+      <div class="nak-bar-fill"
+        [style.width.%]="(sim.nakopitelCount() / sim.nakopitelCapacity) * 100"
+        [style.background]="sim.nakopitelCount() > 90 ? '#ff3333' : sim.nakopitelCount() > 60 ? '#ff9900' : '#3399ff'">
+      </div>
+    </div>
+
     <div class="section-title">Статистика</div>
     <div class="stat-row">
       <span>Обработано</span>

@@ -8,8 +8,12 @@ const LANE_ZS = [-8, -12, -16, -26, -30, -34]; // z positions: lanes 1-3 (4 apar
 // 4 slot positions per lane: 1 at booth (processing) + 3 waiting in line — far left in X
 const SLOT_XS = [-36, -33, -27, -21];
 const MAX_LANE = 4;
-// Main road: east→west along z=0
-const MAIN_ROAD: [number, number][] = [[35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0], [-40, 0], [-50, 0], [-55, 0]];
+// Zone 9: Накопитель — 10 lanes × 10 slots = 100 capacity, north of main road (positive Z)
+const NAK_LANE_ZS = [7, 10, 13, 16, 19, 22, 25, 28, 31, 34];
+const NAK_SLOT_XS = [-11, -15.5, -20, -24.5, -29, -33.5, -38, -42.5, -47, -51.5];
+const NAK_MAX_PER_LANE = 10;
+// Main road: east→west along z=0 — extended east to X=65
+const MAIN_ROAD: [number, number][] = [[65, 0], [60, 0], [55, 0], [50, 0], [45, 0], [40, 0], [35, 0], [30, 0], [25, 0], [20, 0], [15, 0], [10, 0], [5, 0], [0, 0], [-5, 0], [-10, 0], [-20, 0], [-30, 0], [-40, 0], [-50, 0], [-55, 0]];
 const BRANCH_ROAD: [number, number][] = [[5, 0], [5, -3], [5, -6], [5, -9]];
 const TRUCK_COLORS = [
   0xc0392b, 0x2980b9, 0x27ae60, 0xe67e22, 0x8e44ad, 0x16a085, 0xd35400, 0x2c3e50,
@@ -26,6 +30,8 @@ interface TruckObj {
   wpDone: (() => void) | null; inSlot: boolean;
   waitTimer: number; zoneIdx: number;
   zonePath: ZoneNode[]; skipZ9: boolean; laneAssigned: number;
+  isLarge: boolean;
+  enpBlink: ReturnType<typeof setInterval> | null;
 }
 interface LaneData { trucks: TruckObj[]; elapsed: number[]; remaining: number[]; }
 interface ZoneNode {
@@ -42,9 +48,11 @@ export class SceneService {
   private camera!: THREE.PerspectiveCamera;
   private raf = 0; private clock = new THREE.Clock();
   private trucks: TruckObj[] = []; private zones: ZoneNode[] = [];
-  private zone8!: ZoneNode; private truckGroup!: THREE.Group;
-  private idCounter = 1; private spawnTimer = 0; private nextSpawn = 5; private z8Queue: TruckObj[] = [];
+  private zone8!: ZoneNode; private zone9!: ZoneNode; private truckGroup!: THREE.Group;
+  private idCounter = 1; private spawnTimer = 0; private nextSpawn = 5;
+  private z8Queue: TruckObj[] = []; private z9Queue: TruckObj[] = [];
   private truckTemplate: THREE.Group | null = null; private templateReady = false; private glbRotY = 0;
+  private largeTruckTemplate: THREE.Group | null = null;
   private tlRed!: THREE.MeshStandardMaterial; private tlGreen!: THREE.MeshStandardMaterial;
   private roadMat!: THREE.MeshStandardMaterial; private roadScroll = 0;
   private focus = new THREE.Vector3(-10, 0, -10);
@@ -98,10 +106,10 @@ export class SceneService {
     this.buildRoad(); this.buildZoneNodes(); this.buildBuildings();
     this.buildZone8Lanes();
     this.buildGate(); this.buildTrafficLight(); this.buildMonitoringPanel();
-    // buildBorderFence and buildFlagPoles removed
+    this.buildZone9Fence(); this.buildZone9Lanes();
     this.truckGroup = new THREE.Group();
     this.scene.add(this.truckGroup);
-    this.loadTruckTemplate().then(() => { this.spawnTruck(); });
+    this.loadTruckTemplates().then(() => { this.spawnTruck(); });
     this.createTooltip(el); this.bindEvents(el); this.loop();
   }
 
@@ -489,11 +497,27 @@ export class SceneService {
     });
   }
 
-  private async loadTruckTemplate(): Promise<void> {
-    const cargo = await this.loadGLB('assets/models/truck.glb', 0.4);
+  private async loadTruckTemplates(): Promise<void> {
+    const [cargo, large] = await Promise.all([
+      this.loadGLB('assets/models/truck.glb', 0.4),
+      this.loadGLB('assets/models/large_truck.glb', 0.5, -Math.PI / 2),
+    ]);
     if (cargo) { this.glbRotY = 0; cargo.children[0].position.y = 0.92; }
     this.truckTemplate = cargo ?? this.buildProceduralTruck(0xcc3322);
     this.templateReady = true;
+    if (large) { large.children[0].position.y = 0.87; }
+    this.largeTruckTemplate = large ?? this.buildProceduralLargeTruck(0x2244aa);
+  }
+
+  private buildProceduralLargeTruck(color: number): THREE.Group {
+    const g = new THREE.Group(); const Y = 0.12;
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.65, metalness: 0.15 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 2.8), mat);
+    body.position.set(0, Y + 0.5, -0.5); body.castShadow = true; g.add(body);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.85, 0.8),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.3 }));
+    cab.position.set(0, Y + 0.47, 1.2); cab.castShadow = true; g.add(cab);
+    return g;
   }
 
   private buildProceduralTruck(color: number): THREE.Group {
@@ -511,36 +535,48 @@ export class SceneService {
     this.spawnTimer += dt;
     if (this.spawnTimer >= this.nextSpawn) {
       this.spawnTimer = 0;
-      if (!this.sim.isGreen()) return;
-      // Don't spawn if last truck hasn't moved far enough from spawn point
+      const nextIsLarge = Math.random() < 0.30;
+      // Only block spawn on red light for regular trucks
+      if (!nextIsLarge && !this.sim.isGreen()) return;
       const last = this.trucks[this.trucks.length - 1];
-      if (last && last.root.position.x > 28) return;
-      this.spawnTruck();
+      if (last && last.root.position.x > 55) return;
+      this.spawnTruck(nextIsLarge);
       this.nextSpawn = this.sim.getSpawnIntervalSeconds();
     }
   }
 
-  private spawnTruck() {
-    if (!this.templateReady || this.trucks.length >= 40) return;
+  private spawnTruck(isLarge = false) {
+    if (!this.templateReady || this.trucks.length >= 60) return;
     const id = this.idCounter++; const color = TRUCK_COLORS[(id - 1) % TRUCK_COLORS.length];
     let mesh: THREE.Group;
-    if (this.truckTemplate) {
-      mesh = this.truckTemplate.clone();
-      if (this.glbRotY && mesh.children[0]) mesh.children[0].rotation.y = this.glbRotY;
+    const template = isLarge ? this.largeTruckTemplate : this.truckTemplate;
+    if (template) {
+      mesh = template.clone();
+      if (!isLarge && this.glbRotY && mesh.children[0]) mesh.children[0].rotation.y = this.glbRotY;
       mesh.traverse(o => {
         if ((o as THREE.Mesh).isMesh) {
           const orig = (o as THREE.Mesh).material as THREE.MeshStandardMaterial;
-          if (orig?.isMeshStandardMaterial) { const m = orig.clone(); m.color.lerp(new THREE.Color(color), 0.45); (o as THREE.Mesh).material = m; }
+          if (orig?.isMeshStandardMaterial) {
+            const m = orig.clone();
+            m.color.lerp(new THREE.Color(color), isLarge ? 0.2 : 0.45);
+            (o as THREE.Mesh).material = m;
+          }
         }
       });
-    } else { mesh = this.buildProceduralTruck(color); }
-    mesh.position.set(35, 0, 0); mesh.rotation.y = 0;
+    } else {
+      mesh = isLarge ? this.buildProceduralLargeTruck(color) : this.buildProceduralTruck(color);
+    }
+    mesh.position.set(isLarge ? 65 : 35, 0, 0); mesh.rotation.y = 0;
     this.truckGroup.add(mesh); this.sim.truckEntered();
+    const zonePath = isLarge
+      ? [this.zones[0], this.zones[1], this.zone9]
+      : [this.zones[0], this.zones[1], this.zone8];
     const t: TruckObj = {
       id, root: mesh, wheels: [], speed: 0, heading: new THREE.Vector3(-1, 0, 0),
       yaw: 0, steeringAngle: 0, target: null, wpQueue: [], wpDone: null,
       inSlot: false, waitTimer: 0, zoneIdx: -1,
-      zonePath: [...this.zones], skipZ9: false, laneAssigned: -1,
+      zonePath, skipZ9: false, laneAssigned: -1,
+      isLarge, enpBlink: null,
     };
     this.trucks.push(t); this.advance(t);
   }
@@ -565,6 +601,11 @@ export class SceneService {
       z8Slots.map(lane => lane.map(v => [v.x, v.z] as [number, number])),
       [[5, -13], [0, -13], [-5, -13], [-10, -13], [-15, -13]], false, MAX_LANE);
     this.zones.push(z8); this.zone8 = z8;
+    // Zone 9: Накопитель — 10 lanes north of main road, large vehicles only
+    const z9 = make(9, 60, 120, -13, 4,
+      NAK_LANE_ZS.map(lz => NAK_SLOT_XS.map(sx => [sx, lz] as [number, number])),
+      [[-13, 0], [-13, 2], [-13, 4]], false, NAK_MAX_PER_LANE);
+    this.zones.push(z9); this.zone9 = z9;
   }
 
   private tickZones(dt: number) {
@@ -585,6 +626,14 @@ export class SceneService {
               this.moveTo(lane.trucks[i], new THREE.Vector3(tx, 0.15, LANE_ZS[li]));
             }
             if (lane.trucks.length) { lane.remaining[0] = this.rand(zone.minT, zone.maxT) + this.sim.laneDelays()[li]; }
+          } else if (zone === this.zone9) {
+            const li = done.laneAssigned;
+            const slots = zone.slotsByLane[Math.min(li, zone.slotsByLane.length - 1)];
+            for (let i = 0; i < lane.trucks.length; i++) {
+              const s = slots[Math.min(i, slots.length - 1)];
+              this.moveTo(lane.trucks[i], new THREE.Vector3(s.x, 0.15, NAK_LANE_ZS[li]));
+            }
+            if (lane.trucks.length) lane.remaining[0] = this.rand(zone.minT, zone.maxT);
           } else {
             if (lane.trucks.length) lane.remaining[0] = this.rand(zone.minT, zone.maxT);
           }
@@ -606,8 +655,8 @@ export class SceneService {
   private advance(t: TruckObj) {
     t.inSlot = false; t.zoneIdx++;
     if (t.zoneIdx >= t.zonePath.length) { this.exitTruck(t); return; }
-    // Truck leaving zone 1 (погран.контроль) = passed the traffic light
-    if (t.zoneIdx === 1) this.sim.truckPassedLight();
+    // Truck leaving zone 1 (погран.контроль) = passed the traffic light (only regular trucks count)
+    if (t.zoneIdx === 1 && !t.isLarge) this.sim.truckPassedLight();
     const zone = t.zonePath[t.zoneIdx];
     this.followPath(t, [...zone.preWps, zone.entryPt], () => this.tryEnter(t, zone));
   }
@@ -632,12 +681,17 @@ export class SceneService {
       if (zone.id === 8) {
         if (!this.z8Queue.includes(t)) this.z8Queue.push(t);
         const qi = this.z8Queue.indexOf(t);
-        // Queue near zone 8 entry, spaced 2.5 units going right (east)
         this.moveTo(t, new THREE.Vector3(-15 + (qi + 1) * 2.5, 0.15, -13));
+      }
+      if (zone.id === 9) {
+        if (!this.z9Queue.includes(t)) this.z9Queue.push(t);
+        const qi = this.z9Queue.indexOf(t);
+        this.moveTo(t, new THREE.Vector3(-13, 0.15, 2 + (qi + 1) * 3));
       }
       return;
     }
     if (zone.id === 8) this.z8Queue = this.z8Queue.filter(q => q !== t);
+    if (zone.id === 9) { this.z9Queue = this.z9Queue.filter(q => q !== t); this.sim.nakopitelEntered(); }
     const lane = zone.lanes[li];
     const si = lane.trucks.length; // position in lane (0=at booth, 1-3=waiting)
     const slots = zone.slotsByLane[Math.min(li, zone.slotsByLane.length - 1)];
@@ -648,10 +702,14 @@ export class SceneService {
     lane.remaining.push(baseTime + delay);
     t.inSlot = true; t.laneAssigned = li;
     if (zone.id === 8) this.sim.logDistribution(t.id, li);
-    if (zone.id === 8) {
+    if (zone.id === 9) {
+      const laneZ = NAK_LANE_ZS[li];
+      this.followPath(t, [
+        new THREE.Vector3(-10, 0.15, laneZ),
+        new THREE.Vector3(pos.x, 0.15, laneZ),
+      ], () => {});
+    } else if (zone.id === 8) {
       const laneZ = LANE_ZS[li];
-      // Route: go south to lane Z at entry x, then west to slot
-      // At processing position (slot 0), offset truck further under the booth canopy
       const targetX = si === 0 ? pos.x - 3 : pos.x;
       this.followPath(t, [
         new THREE.Vector3(-16, 0.15, laneZ),
@@ -669,13 +727,50 @@ export class SceneService {
   }
 
   private exitTruck(t: TruckObj) {
-    this.sim.truckExited();
-    const lz = t.laneAssigned >= 0 ? LANE_ZS[t.laneAssigned] : -15;
-    this.followPath(t, [
-      new THREE.Vector3(-40, 0.15, lz), new THREE.Vector3(-45, 0.15, lz),
-      new THREE.Vector3(-45, 0.15, -2), new THREE.Vector3(-45, 0.15, 0),
-      new THREE.Vector3(-50, 0.15, 0),
-    ], () => { this.truckGroup.remove(t.root); this.trucks = this.trucks.filter(x => x !== t); });
+    if (t.isLarge) {
+      const laneIdx = Math.max(0, Math.min(t.laneAssigned >= 0 ? t.laneAssigned : 0, NAK_LANE_ZS.length - 1));
+      const lz = NAK_LANE_ZS[laneIdx];
+      this.followPath(t, [
+        new THREE.Vector3(-10, 0.15, lz),
+        new THREE.Vector3(-8, 0.15, lz),
+        new THREE.Vector3(-8, 0.15, 4),
+        new THREE.Vector3(-8, 0.15, 0),
+      ], () => {
+        this.startEnpBlink(t);
+        const ms = (this.rand(60, 120) / this.sim.simSpeed()) * 1000;
+        setTimeout(() => {
+          this.stopEnpBlink(t);
+          this.sim.nakopitelExited();
+          this.sim.truckExited(true);
+          this.followPath(t, [
+            new THREE.Vector3(-20, 0.15, 0),
+            new THREE.Vector3(-55, 0.15, 0),
+          ], () => { this.truckGroup.remove(t.root); this.trucks = this.trucks.filter(x => x !== t); });
+        }, ms);
+      });
+    } else {
+      this.sim.truckExited(false);
+      const lz = t.laneAssigned >= 0 ? LANE_ZS[t.laneAssigned] : -15;
+      this.followPath(t, [
+        new THREE.Vector3(-40, 0.15, lz), new THREE.Vector3(-45, 0.15, lz),
+        new THREE.Vector3(-45, 0.15, -2), new THREE.Vector3(-45, 0.15, 0),
+        new THREE.Vector3(-50, 0.15, 0),
+      ], () => { this.truckGroup.remove(t.root); this.trucks = this.trucks.filter(x => x !== t); });
+    }
+  }
+
+  private startEnpBlink(t: TruckObj) {
+    const light = new THREE.PointLight(0xffaa00, 0, 8);
+    light.position.set(0, 2.5, 0);
+    t.root.add(light);
+    let on = false;
+    t.enpBlink = setInterval(() => { on = !on; light.intensity = on ? 3.5 : 0; }, 500);
+  }
+
+  private stopEnpBlink(t: TruckObj) {
+    if (t.enpBlink) { clearInterval(t.enpBlink); t.enpBlink = null; }
+    const l = t.root.children.find(c => c instanceof THREE.PointLight);
+    if (l) t.root.remove(l);
   }
 
   private moveTo(t: TruckObj, pos: THREE.Vector3, cb?: () => void) { t.target = pos.clone(); t.wpQueue = []; if (cb) t.wpDone = cb; }
@@ -686,8 +781,8 @@ export class SceneService {
     const sd = this.sim.simSpeed(), sDt = dt * sd, redLight = !this.sim.isGreen();
     for (const t of this.trucks) {
       if (t.waitTimer > 0) { t.waitTimer -= sDt; if (t.waitTimer <= 0) this.tryEnter(t, t.zonePath[t.zoneIdx]); continue; }
-      // Stop at red light — only freeze trucks at or before погран.контроль (zone 0)
-      if (redLight && !t.inSlot && t.zoneIdx <= 0) {
+      // Stop at red light — only freeze regular trucks at or before погран.контроль (zone 0)
+      if (redLight && !t.inSlot && t.zoneIdx <= 0 && !t.isLarge) {
         t.speed = Math.max(0, t.speed - 10 * dt); continue;
       }
       // No target — brake
@@ -719,6 +814,62 @@ export class SceneService {
     }
   }
 
+
+  private buildZone9Fence() {
+    const postM = new THREE.MeshStandardMaterial({ color: 0xb8b0a0, roughness: 0.9 });
+    const railM = new THREE.MeshStandardMaterial({ color: 0xa8a098, roughness: 0.85 });
+    const gateBarM = new THREE.MeshStandardMaterial({ color: 0xdd2222 });
+    // Fence bounds: X=-10..-52, Z=6..36
+    const X0 = -10, X1 = -52, Z0 = 6, Z1 = 36;
+    // South fence (Z=Z0), gap at X=-11..-17 (entry gate)
+    for (let x = X0; x >= X1; x -= 2.5) {
+      if (x > -11 || x < -17) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, x, 0.8, Z0, true);
+    }
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - (-17))), railM, (X1 + (-17)) / 2, 1.4, Z0);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - (-17))), railM, (X1 + (-17)) / 2, 0.75, Z0);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X0 - (-11))), railM, (X0 + (-11)) / 2, 1.4, Z0);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X0 - (-11))), railM, (X0 + (-11)) / 2, 0.75, Z0);
+    // Entry gate bar (south face, over entry gap)
+    this.M(new THREE.BoxGeometry(6, 0.18, 0.18), gateBarM, -14, 2.2, Z0, true);
+    // North fence (Z=Z1)
+    for (let x = X0; x >= X1; x -= 2.5) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, x, 0.8, Z1, true);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - X0)), railM, (X0 + X1) / 2, 1.4, Z1);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Math.abs(X1 - X0)), railM, (X0 + X1) / 2, 0.75, Z1);
+    // West fence (X=X1)
+    for (let z = Z0; z <= Z1; z += 2.5) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, X1, 0.8, z, true);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Z1 - Z0), railM, X1, 1.4, (Z0 + Z1) / 2, false, 0, Math.PI / 2);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Z1 - Z0), railM, X1, 0.75, (Z0 + Z1) / 2, false, 0, Math.PI / 2);
+    // East fence (X=X0), gap at Z=7..11 (exit gate)
+    for (let z = Z0; z <= Z1; z += 2.5) {
+      if (z < 7 || z > 11) this.M(new THREE.BoxGeometry(0.18, 1.6, 0.18), postM, X0, 0.8, z, true);
+    }
+    this.M(new THREE.BoxGeometry(0.1, 0.1, Z0 - Z0 + 1), railM, X0, 1.4, Z0);
+    const eastFenceLen1 = Math.abs(Z1 - 11);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, eastFenceLen1), railM, X0, 1.4, (Z1 + 11) / 2, false, 0, Math.PI / 2);
+    this.M(new THREE.BoxGeometry(0.1, 0.1, eastFenceLen1), railM, X0, 0.75, (Z1 + 11) / 2, false, 0, Math.PI / 2);
+    // Exit gate bar (east face, over exit gap)
+    this.M(new THREE.BoxGeometry(0.18, 0.18, 4), gateBarM, X0, 2.2, 9, true);
+    // Road surface inside накопитель
+    this.M(new THREE.BoxGeometry(42, 0.04, 30), this.roadMat, -31, 0.02, 21);
+    // Entry road (Z=0 to Z=6 at X=-13)
+    this.M(new THREE.BoxGeometry(4, 0.04, 6), this.roadMat, -13, 0.02, 3);
+    // Exit road stub (X=-10 to X=-5 at Z=9)
+    this.M(new THREE.BoxGeometry(5, 0.04, 4), this.roadMat, -7.5, 0.02, 9);
+    this.addSprite('Накопитель', -31, 21, 5.0, 4.5, 0.9);
+  }
+
+  private buildZone9Lanes() {
+    const lc = [0xf0d8c0, 0xe8c8b8, 0xf0d8c0, 0xe8c8b8, 0xf0d8c0,
+                0xe8c8b8, 0xf0d8c0, 0xe8c8b8, 0xf0d8c0, 0xe8c8b8];
+    for (let li = 0; li < NAK_LANE_ZS.length; li++) {
+      const lz = NAK_LANE_ZS[li];
+      const stripW = Math.abs(NAK_SLOT_XS[NAK_SLOT_XS.length - 1] - NAK_SLOT_XS[0]) + 6;
+      const stripCx = (NAK_SLOT_XS[0] + NAK_SLOT_XS[NAK_SLOT_XS.length - 1]) / 2;
+      this.M(new THREE.BoxGeometry(stripW, 0.05, 2.2),
+        new THREE.MeshStandardMaterial({ color: lc[li], transparent: true, opacity: 0.3 }),
+        stripCx, 0.025, lz);
+    }
+  }
 
   private rand(min: number, max: number) { return min + Math.random() * (max - min); }
 }

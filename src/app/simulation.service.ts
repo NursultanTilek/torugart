@@ -96,13 +96,18 @@ export class SimulationService {
 
   truckEntered() { this.inSystem.update(n => n + 1); }
   truckPassedLight() { this.trucksPastLight.update(n => n + 1); }
-  truckExited() {
+  truckExited(isLarge = false) {
     this.inSystem.update(n => Math.max(0, n - 1));
-    this.trucksPastLight.update(n => Math.max(0, n - 1));
+    if (!isLarge) this.trucksPastLight.update(n => Math.max(0, n - 1));
     this.totalProcessed.update(n => n + 1);
   }
 
   readonly waitingQueue = signal(0);
+
+  readonly nakopitelCount = signal(0);
+  readonly nakopitelCapacity = 100;
+  nakopitelEntered() { this.nakopitelCount.update(n => n + 1); }
+  nakopitelExited()  { this.nakopitelCount.update(n => Math.max(0, n - 1)); }
 
   updateLanes(occ: number[], details: LaneInfo[], queueCount: number) {
     this.laneOccupancies.set([...occ]);
