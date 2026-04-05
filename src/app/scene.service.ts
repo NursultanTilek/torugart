@@ -542,7 +542,11 @@ export class SceneService {
     this.spawnTimer += dt;
     if (this.spawnTimer >= this.nextSpawn) {
       this.spawnTimer = 0;
-      const nextIsLarge = Math.random() < 0.30;
+      // Enforce 30% large ratio — only spawn large if current proportion is below 30%
+      const totalSmall = this.trucks.filter(t => !t.isLarge).length;
+      const totalLarge = this.trucks.filter(t => t.isLarge).length;
+      const currentRatio = totalLarge / Math.max(1, totalSmall + totalLarge);
+      const nextIsLarge = currentRatio < 0.30 && Math.random() < 0.35;
       // Only block spawn on red light for regular trucks
       if (!nextIsLarge && !this.sim.isGreen()) return;
       // Check if spawn entry point is clear (separate check per spawn X)
