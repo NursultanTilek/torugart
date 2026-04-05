@@ -275,8 +275,6 @@ export class SceneService {
     this.M(new THREE.BoxGeometry(3.6, 0.04, 10), this.roadMat, -45, 0.02, -2);
     // North corridor: from Z=-13 to накопитель south gate at Z=-40
     this.M(new THREE.BoxGeometry(4, 0.04, 30), this.roadMat, -13, 0.02, -26.5);
-    // East-side entry corridor for накопитель (X=-9, Z=-44 to Z=-12)
-    this.M(new THREE.BoxGeometry(3.6, 0.04, 32), this.roadMat, -9, 0.02, -28);
     // Exit road at X=-44: bridges накопитель south gate (Z=-40) to registration backyard (Z=-37)
     this.M(new THREE.BoxGeometry(3.6, 0.04, 4), this.roadMat, -44, 0.02, -38.5);
   }
@@ -857,8 +855,8 @@ export class SceneService {
     const postM = new THREE.MeshStandardMaterial({ color: 0xb8b0a0, roughness: 0.9 });
     const railM = new THREE.MeshStandardMaterial({ color: 0xa8a098, roughness: 0.85 });
     const gateBarM = new THREE.MeshStandardMaterial({ color: 0xdd2222 });
-    // Fence bounds: X=-10..-97, Z=-40..-92 (north of main road)
-    const X0 = -10, X1 = -97, Z0 = -40, Z1 = -92;
+    // Fence bounds: east side extended to X=-5, north at Z=-92
+    const X0 = -5, X1 = -97, Z0 = -40, Z1 = -92;
     const cx = (X0 + X1) / 2, cz = (Z0 + Z1) / 2;
     const fW = Math.abs(X1 - X0), fD = Math.abs(Z1 - Z0);
 
