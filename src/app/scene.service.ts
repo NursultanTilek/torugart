@@ -547,11 +547,8 @@ export class SceneService {
       const totalLarge = this.trucks.filter(t => t.isLarge).length;
       const currentRatio = totalLarge / Math.max(1, totalSmall + totalLarge);
       const nextIsLarge = currentRatio < 0.30 && Math.random() < 0.35;
-      // Only block spawn on red light for regular trucks
-      if (!nextIsLarge && !this.sim.isGreen()) return;
-      // Check if spawn entry point is clear (separate check per spawn X)
-      const spawnX = nextIsLarge ? 65 : 35;
-      const tooClose = this.trucks.some(tr => Math.abs(tr.root.position.x - spawnX) < 10 && Math.abs(tr.root.position.z) < 3);
+      // All trucks spawn at x=65, check if clear
+      const tooClose = this.trucks.some(tr => Math.abs(tr.root.position.x - 65) < 7 && Math.abs(tr.root.position.z) < 3);
       if (tooClose) return;
       this.spawnTruck(nextIsLarge);
       this.nextSpawn = this.sim.getSpawnIntervalSeconds();
@@ -559,7 +556,7 @@ export class SceneService {
   }
 
   private spawnTruck(isLarge = false) {
-    if (!this.templateReady || this.trucks.length >= 120) return;
+    if (!this.templateReady) return;
     const id = this.idCounter++; const color = TRUCK_COLORS[(id - 1) % TRUCK_COLORS.length];
     let mesh: THREE.Group;
     const template = isLarge ? this.largeTruckTemplate : this.truckTemplate;
@@ -595,7 +592,7 @@ export class SceneService {
     } else {
       mesh = isLarge ? this.buildProceduralLargeTruck(color) : this.buildProceduralTruck(color);
     }
-    mesh.position.set(isLarge ? 65 : 35, 0, 0); mesh.rotation.y = 0;
+    mesh.position.set(65, 0, 0); mesh.rotation.y = 0;
     this.truckGroup.add(mesh); this.sim.truckEntered();
     const zonePath = isLarge
       ? [this.zones[0], this.zones[1], this.zone9]

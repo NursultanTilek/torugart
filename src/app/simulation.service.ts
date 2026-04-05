@@ -70,12 +70,9 @@ export class SimulationService {
   setIntensity(v: number) { this.intensity.set(v); }
 
   getSpawnIntervalSeconds(): number {
-    const monthly = this.HOURLY[this.simHour()] ?? 0;
-    if (monthly <= 0) return 9999;
-    // Convert monthly to per-minute: monthly / 30 days = daily, / 60 = per minute
+    const monthly = Math.max(this.HOURLY[this.simHour()] ?? 0, 10); // minimum 10/month so trucks never stop
     const perMinute = (monthly / 30) / 60;
     const rate = perMinute * this.intensity();
-    if (rate <= 0) return 9999;
     return (1 / rate) / this.simSpeed();
   }
 
