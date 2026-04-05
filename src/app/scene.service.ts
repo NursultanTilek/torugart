@@ -315,7 +315,7 @@ export class SceneService {
     for (let li = 0; li < LANE_ZS.length; li++) {
       const lz = LANE_ZS[li];
       // Lane strip — fits between booth gaps and within asphalt
-      const stripW = SLOT_XS[SLOT_XS.length - 1] - SLOT_XS[0] + 2;
+      const stripW = SLOT_XS[SLOT_XS.length - 1] - SLOT_XS[0] + 8;
       const stripCx = (SLOT_XS[0] + SLOT_XS[SLOT_XS.length - 1]) / 2;
       this.M(new THREE.BoxGeometry(stripW, 0.05, 2.4), new THREE.MeshStandardMaterial({ color: lc[li], transparent: true, opacity: 0.35 }), stripCx, 0.025, lz);
       if (li < LANE_ZS.length - 1) this.M(new THREE.BoxGeometry(stripW, 0.02, 0.06), lineM, stripCx, 0.03, (lz + LANE_ZS[li + 1]) / 2);
