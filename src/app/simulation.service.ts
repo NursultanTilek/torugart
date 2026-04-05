@@ -91,10 +91,21 @@ export class SimulationService {
     this.simMinutes.update(m => m + realDelta * this.simSpeed());
   }
 
-  truckEntered() { this.inSystem.update(n => n + 1); }
+  readonly smallInSystem = signal(0);
+  readonly largeInSystem = signal(0);
+  readonly smallProcessed = signal(0);
+  readonly largeProcessed = signal(0);
+
+  truckEntered(isLarge = false) {
+    this.inSystem.update(n => n + 1);
+    if (isLarge) this.largeInSystem.update(n => n + 1);
+    else this.smallInSystem.update(n => n + 1);
+  }
   truckPassedLight() { this.trucksPastLight.update(n => n + 1); }
   truckExited(isLarge = false) {
     this.inSystem.update(n => Math.max(0, n - 1));
+    if (isLarge) { this.largeInSystem.update(n => Math.max(0, n - 1)); this.largeProcessed.update(n => n + 1); }
+    else { this.smallInSystem.update(n => Math.max(0, n - 1)); this.smallProcessed.update(n => n + 1); }
     if (!isLarge) this.trucksPastLight.update(n => Math.max(0, n - 1));
     this.totalProcessed.update(n => n + 1);
   }

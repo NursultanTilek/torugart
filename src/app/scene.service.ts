@@ -593,7 +593,7 @@ export class SceneService {
       mesh = isLarge ? this.buildProceduralLargeTruck(color) : this.buildProceduralTruck(color);
     }
     mesh.position.set(65, 0, 0); mesh.rotation.y = 0;
-    this.truckGroup.add(mesh); this.sim.truckEntered();
+    this.truckGroup.add(mesh); this.sim.truckEntered(isLarge);
     const zonePath = isLarge
       ? [this.zones[0], this.zones[1], this.zone9]
       : [this.zones[0], this.zones[1], this.zone8];

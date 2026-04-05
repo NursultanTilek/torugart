@@ -73,12 +73,20 @@
 
     <div class="section-title">Статистика</div>
     <div class="stat-row">
-      <span>Обработано</span>
-      <span class="val">{{ sim.totalProcessed() }}</span>
+      <span>Обработано (малые)</span>
+      <span class="val">{{ sim.smallProcessed() }}</span>
     </div>
     <div class="stat-row">
-      <span>В системе</span>
-      <span class="val">{{ sim.inSystem() }}</span>
+      <span>Обработано (крупные)</span>
+      <span class="val">{{ sim.largeProcessed() }}</span>
+    </div>
+    <div class="stat-row">
+      <span>В системе (малые)</span>
+      <span class="val">{{ sim.smallInSystem() }}</span>
+    </div>
+    <div class="stat-row">
+      <span>В системе (крупные)</span>
+      <span class="val">{{ sim.largeInSystem() }}</span>
     </div>
     <div class="stat-row">
       <span>Зона регистрации</span>
