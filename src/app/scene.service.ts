@@ -50,7 +50,6 @@ export class SceneService {
   private trucks: TruckObj[] = []; private zones: ZoneNode[] = [];
   private zone8!: ZoneNode; private zone9!: ZoneNode; private truckGroup!: THREE.Group;
   private idCounter = 1; private spawnTimer = 0; private nextSpawn = 5;
-  private largeTruckColorIdx = 0;
   private z8Queue: TruckObj[] = []; private z9Queue: TruckObj[] = [];
   private truckTemplate: THREE.Group | null = null; private templateReady = false; private glbRotY = 0;
   private largeTruckTemplate: THREE.Group | null = null;
@@ -560,29 +559,19 @@ export class SceneService {
     const id = this.idCounter++; const color = TRUCK_COLORS[(id - 1) % TRUCK_COLORS.length];
     let mesh: THREE.Group;
     const template = isLarge ? this.largeTruckTemplate : this.truckTemplate;
-    // Distinctive colors for large trucks — cycles through all 8 per successive large truck
-    const LARGE_BODY_COLORS = [0xff4400, 0x0055ee, 0x007722, 0xcc8800, 0x880088, 0x006688, 0xcc2244, 0x334499];
     if (template) {
       mesh = template.clone();
       if (!isLarge && this.glbRotY && mesh.children[0]) mesh.children[0].rotation.y = this.glbRotY;
       if (isLarge) {
-        const bodyColor = new THREE.Color(LARGE_BODY_COLORS[this.largeTruckColorIdx++ % LARGE_BODY_COLORS.length]);
-        const CAR_COLORS = [0xff2200, 0x22aaff, 0x22dd44, 0xffdd00, 0xff44aa, 0x00cccc, 0xff6600, 0x9944ff];
-        const tmpBox = new THREE.Box3(); const tmpV = new THREE.Vector3();
-        let carIdx = 0;
+        // Give every mesh part a unique random color
+        const shuffled = [...TRUCK_COLORS].sort(() => Math.random() - 0.5);
+        let partIdx = 0;
         mesh.traverse(o => {
           if ((o as THREE.Mesh).isMesh) {
             const orig = (o as THREE.Mesh).material as THREE.MeshStandardMaterial;
             if (orig?.isMeshStandardMaterial) {
               const m = orig.clone();
-              tmpBox.setFromObject(o); tmpBox.getCenter(tmpV);
-              if (tmpV.y > 3.0) {
-                // Mesh sits on the carrier deck — give each car its own distinct color
-                m.color.set(CAR_COLORS[carIdx++ % CAR_COLORS.length]);
-                m.roughness = 0.3; m.metalness = 0.2;
-              } else {
-                m.color.copy(bodyColor);
-              }
+              m.color.set(shuffled[partIdx++ % shuffled.length]);
               (o as THREE.Mesh).material = m;
             }
           }
