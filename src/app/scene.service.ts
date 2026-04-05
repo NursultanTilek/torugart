@@ -767,7 +767,7 @@ export class SceneService {
         new THREE.Vector3(-44, 0.15, 0),   // north on Registration Exit Road to main road
       ], () => {
         this.startEnpBlink(t);
-        const ms = (this.rand(30, 60) / this.sim.simSpeed()) * 1000;
+        const ms = (2 / this.sim.simSpeed()) * 1000;
         setTimeout(() => {
           this.stopEnpBlink(t);
           this.sim.nakopitelExited();
