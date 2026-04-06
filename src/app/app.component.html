@@ -50,6 +50,16 @@
       </select>
     </div>
 
+    <div class="section-title">Скорость</div>
+    <div class="speed-btns">
+      @for (s of speeds; track s) {
+        <button (click)="setSpeed(s)" [class.active]="sim.simSpeed() === s">{{ s }}x</button>
+      }
+    </div>
+    <button class="pause-btn" (click)="togglePause()">
+      {{ sim.isPaused() ? '▶ Продолжить' : '⏸ Пауза' }}
+    </button>
+
     <div class="section-title">Интенсивность</div>
     <div class="speed-btns">
       @for (v of intensities; track v) {
@@ -103,7 +113,7 @@
       </div>
     }
 
-    <div class="section-title">Полосы регистрации (6)</div>
+    <div class="section-title">Полосы регистрации ({{ sim.activeLanes() }})</div>
     <div class="lanes">
       @for (info of sim.laneDetails(); track $index) {
         <div class="lane-item">
@@ -129,11 +139,15 @@
       Режим: {{ lightModeLabel() }}
     </button>
 
-    <div class="section-title">Макс. ёмкость</div>
+    <div class="section-title">Количество полос</div>
     <div class="speed-btns" style="justify-content:center;align-items:center">
-      <button (click)="sim.setMaxCapacity(sim.maxCapacity() - 2)">-2</button>
-      <span class="val" style="min-width:32px;text-align:center">{{ sim.maxCapacity() }}</span>
-      <button (click)="sim.setMaxCapacity(sim.maxCapacity() + 2)">+2</button>
+      <button (click)="sim.setActiveLanes(sim.activeLanes() - 1)">-1</button>
+      <span class="val" style="min-width:32px;text-align:center">{{ sim.activeLanes() }}</span>
+      <button (click)="sim.setActiveLanes(sim.activeLanes() + 1)">+1</button>
+    </div>
+    <div class="stat-row">
+      <span>Макс. ёмкость</span>
+      <span class="val">{{ sim.maxCapacity() }} ({{ sim.activeLanes() }} × 4)</span>
     </div>
 
     <div class="section-title">Распределение по полосам</div>
@@ -149,16 +163,6 @@
         </div>
       }
     </div>
-
-    <div class="section-title">Скорость</div>
-    <div class="speed-btns">
-      @for (s of speeds; track s) {
-        <button (click)="setSpeed(s)" [class.active]="sim.simSpeed() === s">{{ s }}x</button>
-      }
-    </div>
-    <button class="pause-btn" (click)="togglePause()">
-      {{ sim.isPaused() ? '▶ Продолжить' : '⏸ Пауза' }}
-    </button>
 
     <div class="hint">Мышь: тащи для панорамы · Колесо: масштаб</div>
   </div>

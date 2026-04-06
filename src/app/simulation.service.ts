@@ -32,9 +32,10 @@ export class SimulationService {
   // Total trucks past the traffic light (погран.контроль → весы → накопитель → zone 8)
   readonly trucksPastLight = signal(0);
 
-  // Configurable max capacity for the checkpoint (6-60)
-  readonly maxCapacity = signal(24);
-  setMaxCapacity(v: number) { this.maxCapacity.set(Math.max(6, Math.min(60, v))); }
+  // Number of active lanes (1-6) and max capacity = lanes × 4
+  readonly activeLanes = signal(6);
+  readonly maxCapacity = computed(() => this.activeLanes() * 4);
+  setActiveLanes(v: number) { this.activeLanes.set(Math.max(1, Math.min(6, v))); }
 
   // Manual traffic light override: null = auto, true = green, false = red
   readonly manualLight = signal<boolean | null>(null);
