@@ -19,23 +19,18 @@ export class SimulationService {
   readonly simMinutes = signal(8 * 60);
   readonly totalProcessed = signal(0);
   readonly inSystem = signal(0);
-  readonly laneOccupancies = signal<number[]>([0, 0, 0, 0, 0, 0]);
-  readonly laneDetails = signal<LaneInfo[]>([
-    { processing: false, remaining: 0, queueCount: 0 },
-    { processing: false, remaining: 0, queueCount: 0 },
-    { processing: false, remaining: 0, queueCount: 0 },
-    { processing: false, remaining: 0, queueCount: 0 },
-    { processing: false, remaining: 0, queueCount: 0 },
-    { processing: false, remaining: 0, queueCount: 0 },
-  ]);
+  readonly laneOccupancies = signal<number[]>(Array(12).fill(0));
+  readonly laneDetails = signal<LaneInfo[]>(
+    Array.from({ length: 12 }, () => ({ processing: false, remaining: 0, queueCount: 0 }))
+  );
   readonly zone8Total = computed(() => this.laneOccupancies().reduce((a, b) => a + b, 0));
   // Total trucks past the traffic light (погран.контроль → весы → накопитель → zone 8)
   readonly trucksPastLight = signal(0);
 
-  // Number of active lanes (1-6) and max capacity = lanes × 4
+  // Number of active lanes (6-12) and max capacity = lanes × 4
   readonly activeLanes = signal(6);
   readonly maxCapacity = computed(() => this.activeLanes() * 4);
-  setActiveLanes(v: number) { this.activeLanes.set(Math.max(1, Math.min(6, v))); }
+  setActiveLanes(v: number) { this.activeLanes.set(Math.max(6, Math.min(12, v))); }
 
   // Manual traffic light override: null = auto, true = green, false = red
   readonly manualLight = signal<boolean | null>(null);
@@ -78,7 +73,7 @@ export class SimulationService {
   }
 
   // Per-lane time adjustment in minutes (added to base 20-25 min)
-  readonly laneDelays = signal<number[]>([0, 0, 0, 0, 0, 0]);
+  readonly laneDelays = signal<number[]>(Array(12).fill(0));
   adjustLaneDelay(lane: number, delta: number) {
     this.laneDelays.update(d => { const n = [...d]; n[lane] = Math.max(-15, Math.min(60, n[lane] + delta)); return n; });
   }

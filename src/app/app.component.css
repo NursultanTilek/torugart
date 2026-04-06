@@ -155,7 +155,15 @@
   color: #88aaee; letter-spacing: 0.5px;
   margin-bottom: 4px; padding-bottom: 8px;
   border-bottom: 1px solid #1e2840;
+  display: flex; justify-content: space-between; align-items: center;
 }
+.pause-icon {
+  width: 28px; height: 28px; border-radius: 5px;
+  border: 1px solid #2a3a5a; background: #161c2c;
+  color: #88aaee; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pause-icon:hover { background: #1e2a42; }
 
 .section-title {
   font-size: 11px; font-weight: 600;

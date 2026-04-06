@@ -31,6 +31,17 @@ export class AppComponent implements OnInit, OnDestroy {
   toggleLight() { this.sim.toggleLight(); }
 
   setIntensity(v: number) { this.sim.setIntensity(v); }
+  changeLanes(delta: number) {
+    if (delta < 0) {
+      // Check if the last lane has trucks — don't allow removing
+      const occ = this.sim.laneOccupancies();
+      const lastLane = this.sim.activeLanes() - 1;
+      if (occ[lastLane] > 0) return; // truck in lane, can't remove
+    }
+    const n = this.sim.activeLanes() + delta;
+    this.sim.setActiveLanes(n);
+    this.scene.rebuildLanes(this.sim.activeLanes());
+  }
   get speeds() { return [1, 2, 5, 10]; }
   get hours() { return [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]; }
   get intensities() { return [1, 2, 4, 6, 12, 24]; }
