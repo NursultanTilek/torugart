@@ -690,6 +690,8 @@ export class SceneService {
     for (const zone of this.zones) {
       for (const lane of zone.lanes) {
         if (!lane.trucks.length) continue;
+        // Skip if timer not started yet (truck still moving to slot)
+        if (lane.remaining[0] <= 0) continue;
         lane.elapsed[0] += sd; lane.remaining[0] -= sd;
         if (lane.remaining[0] <= 0) {
           const done = lane.trucks.shift()!; lane.elapsed.shift(); lane.remaining.shift();
